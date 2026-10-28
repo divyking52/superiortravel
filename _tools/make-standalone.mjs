@@ -260,6 +260,28 @@ const ft = ir.footer;
 const footerCols = (ft.columns || []).map((c) => `<div><h2>${e(tx(c.title))}</h2><ul>${(c.links || []).map((l) => `<li><a ${hrefAttr(l.link?.href)}>${e(l.text)}</a></li>`).join('')}</ul></div>`).join('');
 const co = ft.company;
 
+// Web fonts used by the site (Latin subset, variable weights), embedded so the file stays standalone.
+// Downloaded once from Google Fonts and cached in _tools/cache/fonts.css.
+const FONT_CACHE = path.join(ROOT, '_tools', 'cache', 'fonts.css');
+async function embeddedFonts() {
+  if (fs.existsSync(FONT_CACHE)) return fs.readFileSync(FONT_CACHE, 'utf8');
+  const families = 'family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=Work+Sans:ital,wght@0,400..800;1,400..600&family=Raleway:ital,wght@0,400..800;1,400..600';
+  const css = await (await fetch(`https://fonts.googleapis.com/css2?${families}&display=swap`, {
+    headers: { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36' },
+  })).text();
+  const latin = [...css.matchAll(/\/\* latin \*\/\s*(@font-face\s*\{[^}]+\})/g)].map((m) => m[1]);
+  if (!latin.length) throw new Error('Could not read Google Fonts CSS');
+  const out = [];
+  for (const block of latin) {
+    const url = block.match(/url\((https:[^)]+\.woff2)\)/)[1];
+    const font = Buffer.from(await (await fetch(url)).arrayBuffer()).toString('base64');
+    out.push(block.replace(/src:[^;]+;/, `src:url(data:font/woff2;base64,${font}) format("woff2");`).replace(/\s+/g, ' '));
+  }
+  write(FONT_CACHE, out.join('\n'));
+  return out.join('\n');
+}
+const FONTS = await embeddedFonts();
+
 const CSS = `
 :root{--ink:#17323E;--muted:#5D7079;--navy:#163E52;--gold:#C87812;--gold-ink:#8a530c;--cream:#FFFCF7;--mist:#EDF6F8;--line:#dce6e8;--serif:"EB Garamond",Garamond,Georgia,"Times New Roman",serif;--sans:"Work Sans",system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
 *{box-sizing:border-box}html{scroll-padding-top:84px}body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.6 var(--sans)}
@@ -269,7 +291,7 @@ img{max-width:100%;height:auto}a{color:inherit}[hidden]{display:none!important}
 .skip{position:fixed;left:12px;top:-60px;z-index:100;background:var(--navy);color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none;font-weight:600}.skip:focus{top:12px}
 /* Header */
 header.site{position:sticky;top:0;z-index:40;background:#fffcf7f5;border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
-header.site .bar{display:flex;align-items:center;gap:12px;width:min(1240px,100%);margin:0 auto;padding:8px 20px;min-height:68px}
+header.site .bar{display:flex;align-items:center;gap:12px;width:min(1120px,100%);margin:0 auto;padding:8px 24px;min-height:68px}
 .brand{display:flex;align-items:center;flex:none}.brand img{width:56px;height:auto}
 nav.main{margin:0 auto}nav.main>ul{list-style:none;margin:0;padding:0;display:flex;align-items:center;gap:2px}
 nav.main a,.menu-toggle{display:flex;align-items:center;gap:4px;padding:10px 12px;border-radius:10px;text-decoration:none;font:500 15px/1.2 var(--sans);color:var(--ink);background:none;border:0;cursor:pointer}
@@ -293,7 +315,7 @@ nav.main a:hover,.menu-toggle:hover{background:#c878120f}nav.main a[aria-current
 .sx-kicker{display:block;color:var(--gold-ink);font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;margin-bottom:8px}
 .sx-lead{font-size:17px;max-width:760px;margin:0 0 14px}.sx-sub{color:var(--muted);margin:0 0 8px}.sx-meta{font-size:13px;color:var(--muted);margin:0 0 6px}.sx-note{font-size:13.5px;color:var(--muted)}
 .sx-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
-.sx-btn{display:inline-flex;align-items:center;min-height:44px;padding:10px 18px;border-radius:10px;background:var(--navy);color:#fff!important;text-decoration:none;font:600 14.5px/1.2 var(--sans);border:1px solid var(--navy);cursor:pointer}
+.sx-btn{display:inline-flex;align-items:center;justify-content:center;text-align:center;min-height:44px;padding:10px 18px;border-radius:10px;background:var(--navy);color:#fff!important;text-decoration:none;font:600 14.5px/1.2 var(--sans);border:1px solid var(--navy);cursor:pointer}
 .sx-btn:hover{background:#0f2f3f}.sx-btn.light{background:#fff;color:var(--navy)!important;border-color:#fff}.sx-btn.ghost{background:transparent;border-color:#ffffffa0}.sx-btn.ghost-dark{background:transparent;color:var(--navy)!important}
 .sx-hero{color:#fff;background:linear-gradient(90deg,#0b2633e6,#0b263399 60%,#0b263340),var(--bg,linear-gradient(135deg,#163E52,#346C8D)) center/cover;padding:84px 0 70px}
 .sx-hero .sx-kicker{color:#F8C979}.sx-hero .sx-sub,.sx-hero .sx-lead{color:#eef5f7}
@@ -320,7 +342,10 @@ nav.main a:hover,.menu-toggle:hover{background:#c878120f}nav.main a[aria-current
 blockquote{margin:0}blockquote footer{font-size:13px;color:var(--muted);margin-top:8px}
 .sx-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px}
 .sx-field{display:flex;flex-direction:column;gap:4px}.sx-field.full,.sx-form .sx-note,.sx-form .sx-status{grid-column:1/-1}
-.sx-field label,.sx-filter label{font-size:13px;font-weight:600}
+.sx-field label,.sx-filter label{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
+.sx-filter input,.sx-filter select,.sx-filter button{width:100%;height:44px;min-height:0}
+.sx-filter button{width:auto}
+input[type="search"]{-webkit-appearance:none;appearance:none;box-sizing:border-box}
 .sx-field input,.sx-field textarea,.sx-filter input,.sx-filter select{font:inherit;color:var(--ink);padding:10px 12px;border:1px solid #b9c7cb;border-radius:10px;background:#fff;min-height:44px}
 .sx-field [aria-invalid="true"]{border-color:#b3261e}.sx-error{color:#b3261e;font-size:12.5px;margin:0}
 .sx-form button{justify-self:start}@media(max-width:640px){.sx-form{grid-template-columns:1fr}}
@@ -334,10 +359,10 @@ blockquote{margin:0}blockquote footer{font-size:13px;color:var(--muted);margin-t
 .st-rail-toggle{margin-top:14px;padding:6px 12px;border:1px solid #c9d3d6;border-radius:999px;background:#fff;color:#17323e;font:600 12px var(--sans);cursor:pointer}
 /* Footer */
 footer.site{background:#163E52;color:#dce7eb;padding:44px 0 26px;font-size:14px}
-footer.site .cols{width:min(1180px,100%);margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1.3fr repeat(4,1fr);gap:26px}
+footer.site .cols{width:min(1120px,100%);margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1.3fr repeat(4,1fr);gap:26px}
 footer.site h2{font:700 11px/1.4 var(--sans);letter-spacing:.16em;text-transform:uppercase;color:#F8C979;margin:0 0 10px}
 footer.site ul{list-style:none;margin:0;padding:0}footer.site li{margin-bottom:7px}footer.site a{color:#fff;text-decoration:none}footer.site a:hover{text-decoration:underline}
-footer.site .legal{width:min(1180px,100%);margin:26px auto 0;padding:16px 24px 0;border-top:1px solid #ffffff2a;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#b8cdd5}
+footer.site .legal{width:min(1120px,100%);margin:26px auto 0;padding:16px 24px 0;border-top:1px solid #ffffff2a;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#b8cdd5}
 @media(max-width:860px){footer.site .cols{grid-template-columns:1fr 1fr}}
 /* Search */
 dialog.search{width:min(740px,calc(100vw - 24px));max-height:min(86vh,820px);padding:0;border:0;border-radius:16px;background:var(--cream);color:var(--ink);box-shadow:0 24px 70px #0a1e2859}
@@ -554,7 +579,7 @@ const html = `<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Superior Travel Consultants | Customized Travel Planning</title>
 <meta name="description" content="Superior Travel Consultants of Baldwin, New York: customized travel planning backed by more than 150 years of combined experience.">
-<style>${CSS}</style>
+<style>${FONTS}${CSS}</style>
 <style id="page-style"></style>
 </head>
 <body>
