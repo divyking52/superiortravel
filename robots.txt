@@ -1,0 +1,10 @@
+# Allow all bots (search, AI, social previews)
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /private/
+
+Sitemap: https://superiortravel.com/sitemap.xml
+
+# LLM-friendly site summary
+Allow: /llms.txt
