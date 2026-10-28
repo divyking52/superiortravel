@@ -47,7 +47,23 @@ const linkFor = (url, size) => {
   return (m && mediaLink(m[2].toLowerCase(), m[3], m[4], size)) || url;
 };
 
-const agentPhotos = Object.fromEntries(readJson('content/agents.json').agents.filter((a) => a.photo).map((a) => [a.slug, linkFor(a.photo, 'large')]));
+// Images re-uploaded to the site's own media library (content/media-map.json, from
+// _tools/map-media-library.mjs): original image link -> library link. Applied to every page.
+const mediaMap = fs.existsSync(path.join(ROOT, 'content/media-map.json')) ? readJson('content/media-map.json').map : {};
+const mapStats = { mapped: 0 };
+const mapMedia = (text) =>
+  text.replace(/https?:\/\/[^"'\s)<>,]+/g, (u) => {
+    const hit = mediaMap[u.replace(/&amp;/g, '&')];
+    if (!hit) return u;
+    mapStats.mapped++;
+    return hit;
+  });
+
+const agentPhotos = Object.fromEntries(
+  readJson('content/agents.json')
+    .agents.map((a) => [a.slug, mediaMap[`(embedded advisor photo: ${a.slug})`] || (a.photo && linkFor(a.photo, 'large'))])
+    .filter(([, src]) => src),
+);
 const AGENT_IMG = /\/media\/agents\/([a-z-]+)-\d+\.webp/;
 const imgSrc = (src) => {
   const m = (src || '').match(AGENT_IMG);
@@ -239,7 +255,7 @@ ${s.publishedFlyer?.src ? `<h2>Published flyer</h2>${img(s.publishedFlyer, ' cla
         const loc = typeof a.location === 'object' ? tx(a.location) : a.location;
         const specs = (a.specialties || []).map((x) => tx(x.title) || x.title).filter(Boolean);
         const creds = (a.credentials || []).length;
-        const photo = owners ? linkFor(abs(a.avatarMedia?.src || ''), 'large') : agentPhotos[slug] || imgSrc(a.avatarMedia?.src);
+        const photo = owners ? imgSrc(a.avatarMedia?.src) : agentPhotos[slug] || imgSrc(a.avatarMedia?.src);
         return `<li class="tm-card" data-agent="${e(slug)}" data-cats="${e(trips.map((c) => c.id).join(' '))}" data-name="${e(name.toLowerCase())}">
 <div class="tm-photo"><img src="${e(photo)}" alt="${e(a.avatarMedia?.alt || name)}" loading="lazy" decoding="async"></div>
 <div class="tm-body"><h3><a ${hrefAttr(a.link?.href)}>${e(name)}</a></h3>
@@ -345,15 +361,15 @@ const search = index.entries.map((x) => {
 });
 
 const names = Object.fromEntries(readJson('assets/st-agents.json').agents.map((a) => [a.slug, a.name.split(',')[0]]));
-for (const p of pages) p.h = relinkMedia(p.h);
-styles.forEach((css, i) => (styles[i] = relinkMedia(css)));
-cta.html = relinkMedia(cta.html);
+for (const p of pages) p.h = relinkMedia(mapMedia(p.h));
+styles.forEach((css, i) => (styles[i] = relinkMedia(mapMedia(css))));
+cta.html = relinkMedia(mapMedia(cta.html));
 const payload = { pages, styles, cta: { h: cta.html, s: cta.ids }, search, names };
 const packed = zlib.gzipSync(Buffer.from(JSON.stringify(payload)), { level: 9 }).toString('base64');
 
 // ---------------------------------------------------------------------------------------------
 // Shell: header navigation and footer from the site's header/footer data.
-const logo = libByName.get('1476896544-5688176.png')?.url || `data:image/png;base64,${fs.readFileSync(path.join(ROOT, 'logos/1476896544.5688176.png')).toString('base64')}`;
+const logo = mediaMap['(embedded data URI)'] || libByName.get('1476896544-5688176.png')?.url || `data:image/png;base64,${fs.readFileSync(path.join(ROOT, 'logos/1476896544.5688176.png')).toString('base64')}`;
 const navItems = ir.header.center.navbarItems.navbarItems;
 const navHtml = navItems
   .map((item, i) => {
@@ -918,5 +934,5 @@ ${footerCols}
 write('standalone/superior-travel.html', html);
 const raw = Buffer.byteLength(JSON.stringify(payload));
 console.log(`standalone/superior-travel.html — ${(Buffer.byteLength(html) / 1024).toFixed(0)} KB (${pages.length} pages; content ${(raw / 1024).toFixed(0)} KB compressed into the file, ${styles.length} shared style blocks).`);
-console.log(`Storebox media links: ${mediaStats.library} from the media library, ${mediaStats.global} from the shared media pool.`);
+console.log(`Storebox media links: ${mapStats.mapped} from the site media library (content/media-map.json); ${mediaStats.library} from the original library and ${mediaStats.global} from the shared pool for images not in it.`);
 if (mediaStats.missing.size) console.log(`Not in the media library (links left unchanged): ${[...mediaStats.missing].join(', ')}`);
