@@ -89,26 +89,42 @@ const R = {
     return `<article class="sx sx-article"><div class="sx-wrap narrow"><p class="sx-meta"><a href="#/blogs">Blog</a> · ${e(fmtDate(b.published_at))}</p>${hasH1 ? '' : `<h1>${e(b.title)}</h1>`}${src ? `<img class="sx-feature" src="${e(abs(src))}" alt="" decoding="async">` : ''}<div class="sx-prose">${b.content || ''}</div></div></article>`;
   },
   contact(s, first) {
-    return wrap(s, `<div class="sx-split"><div>${head(s, first)}<div class="sx-actions">${button(s.primaryButton)}${button(s.secondaryButton, 'ghost-dark')}</div></div>
-<form class="sx-form" data-mailto-form novalidate>
-<p class="sx-note">This form opens your email app with your message addressed to inquiries@superiortravel.com. To use the online form instead, visit <a href="${SITE_ORIGIN}/contact" target="_blank" rel="noopener noreferrer">superiortravel.com/contact</a>.</p>
-<div class="sx-field"><label for="cf-name">Full name *</label><input id="cf-name" name="name" autocomplete="name" required><p class="sx-error" data-error-for="name"></p></div>
-<div class="sx-field"><label for="cf-email">Email *</label><input id="cf-email" name="email" type="email" autocomplete="email" required><p class="sx-error" data-error-for="email"></p></div>
-<div class="sx-field"><label for="cf-phone">Phone (optional)</label><input id="cf-phone" name="phone" type="tel" autocomplete="tel"></div>
-<div class="sx-field"><label for="cf-dates">Approximate travel dates (optional)</label><input id="cf-dates" name="dates" placeholder="For example: October 2027 or flexible"></div>
-<div class="sx-field full"><label for="cf-subject">Subject *</label><input id="cf-subject" name="subject" required><p class="sx-error" data-error-for="subject"></p></div>
-<div class="sx-field full"><label for="cf-message">Message *</label><textarea id="cf-message" name="message" rows="5" required></textarea><p class="sx-error" data-error-for="message"></p></div>
-<button class="sx-btn" type="submit">Write my email</button><p class="sx-status" role="status" aria-live="polite"></p></form></div>`);
+    const level = first ? 'h1' : 'h2';
+    const field = (id, name, label, attrs = '', full = false, area = false) =>
+      `<div class="ct-field${full ? ' full' : ''}"><label for="cf-${id}">${label}</label>${area ? `<textarea id="cf-${id}" name="${name}" rows="4"${attrs}></textarea>` : `<input id="cf-${id}" name="${name}"${attrs}>`}<p class="sx-error" data-error-for="${name}"></p></div>`;
+    return `<section class="ct-hero" id="${e(s.id)}"><div class="sx-wrap ct-grid">
+<div class="ct-intro">${tx(s.eyebrow) ? `<span class="ct-pill">${e(tx(s.eyebrow))}</span>` : ''}<${level}>${e(tx(s.title))}</${level}><p>${e(tx(s.description))}</p>
+<div class="ct-actions">${s.primaryButton?.link?.href ? `<a class="ct-btn gold" ${hrefAttr(s.primaryButton.link.href)}>${e(tx(s.primaryButton))}</a>` : ''}${s.secondaryButton?.link?.href ? `<a class="ct-btn white" ${hrefAttr(s.secondaryButton.link.href)}>${e(tx(s.secondaryButton))}</a>` : ''}</div></div>
+<div class="ct-card"><form class="ct-form" data-mailto-form novalidate>
+${field('first', 'first', 'First name *', ' autocomplete="given-name" required')}${field('last', 'last', 'Last name *', ' autocomplete="family-name" required')}
+${field('email', 'email', 'Email *', ' type="email" autocomplete="email" required')}${field('phone', 'phone', 'Phone (optional)', ' type="tel" autocomplete="tel"')}
+${field('dates', 'dates', 'Approximate travel dates (optional)', ' placeholder="For example: October 2027 or flexible"', true)}
+${field('subject', 'subject', 'Subject *', ' required', true)}
+${field('message', 'message', 'Message *', ' required', true, true)}
+<button class="ct-submit" type="submit">${e(s.contact?.submitButton?.text || 'Start my trip conversation')}</button>
+<p class="ct-note">Sending opens your email app with your message addressed to <a href="mailto:inquiries@superiortravel.com">inquiries@superiortravel.com</a>. You can also use the <a href="${SITE_ORIGIN}/contact" target="_blank" rel="noopener noreferrer">online form<span class="vh"> (opens in a new tab)</span></a>. See our <a href="#/privacy">Privacy Policy</a> &amp; <a href="#/terms">Terms</a>.</p>
+<p class="ct-status" role="status" aria-live="polite"></p></form></div></div></section>`;
   },
   trustBar(s) {
     const items = s.shareable?.socialProof?.items || [];
-    return wrap(s, `${tx(s.eyebrow) ? `<span class="sx-kicker">${e(tx(s.eyebrow))}</span>` : ''}<ul class="sx-badges">${items.map((i) => `<li>${e(i.title)}</li>`).join('')}</ul>`, 'tight');
+    return `<section class="ct-trust" aria-label="${e(tx(s.eyebrow) || 'Why plan with us')}"><div class="sx-wrap"><ul>${items.map((i) => `<li><span>${e(i.title)}</span></li>`).join('')}</ul></div></section>`;
   },
   'steps.grid'(s, first) {
-    return wrap(s, `${head(s, first)}<ol class="sx-cards sx-plain">${(s.steps || []).map((st) => `<li class="sx-card"><div><span class="sx-kicker">${e(tx(st.eyebrow))}</span><h3>${e(tx(st.title))}</h3><p>${e(tx(st.description))}</p></div></li>`).join('')}</ol>`, 'alt');
+    const level = first ? 'h1' : 'h2';
+    return `<section class="ct-steps" id="${e(s.id)}"><div class="sx-wrap"><header class="tm-head">${tx(s.eyebrow) ? `<span class="tm-pill">${e(tx(s.eyebrow))}</span>` : ''}<${level}>${e(tx(s.title))}</${level}>${tx(s.description) ? `<p>${e(tx(s.description))}</p>` : ''}</header><ol>${(s.steps || [])
+      .map((st, i) => `<li><span class="ct-num" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span><span class="ct-step-ey">${e(tx(st.eyebrow))}</span><h3>${e(tx(st.title))}</h3><p>${e(tx(st.description))}</p></li>`)
+      .join('')}</ol></div></section>`;
   },
   'testimonials.grid'(s, first) {
-    return wrap(s, `${head(s, first)}<ul class="sx-cards sx-plain">${(s.items || []).map((t) => `<li class="sx-card"><blockquote><p>“${e(tx(t.content))}”</p><footer>— ${e(tx(t.author))}${tx(t.role) ? `, ${e(tx(t.role))}` : ''}</footer></blockquote></li>`).join('')}</ul>`);
+    const level = first ? 'h1' : 'h2';
+    const tones = ['#FBE8C9:#E99A2D', '#FBE8C9:#E99A2D', '#E5DBFF:#7C3AED'];
+    return `<section class="ct-quotes" id="${e(s.id)}"><div class="sx-wrap"><header class="tm-head">${tx(s.eyebrow) ? `<span class="tm-pill">${e(tx(s.eyebrow))}</span>` : ''}<${level}>${e(tx(s.title))}</${level}>${tx(s.description) ? `<p>${e(tx(s.description))}</p>` : ''}</header><ul>${(s.items || [])
+      .map((t, i) => {
+        const [bg, dot] = tones[i % tones.length].split(':');
+        const long = tx(t.content).length > 220;
+        return `<li class="ct-quote"><span class="ct-mark" aria-hidden="true">“</span><blockquote><p class="ct-text${long ? ' clamp' : ''}">${e(tx(t.content))}</p>${long ? '<button type="button" class="ct-more" aria-expanded="false">Read more</button>' : ''}</blockquote><div class="ct-author"><span class="ct-avatar" style="background:${bg}" aria-hidden="true"><i style="background:${dot}"></i></span><div><strong>${e(tx(t.author))}</strong>${tx(t.role) ? `<span>${e(tx(t.role))}</span>` : ''}</div></div></li>`;
+      })
+      .join('')}</ul></div></section>`;
   },
   'travel.trip-collection'(s, first) {
     return wrap(s, `${head(s, first)}<ul class="sx-cards">${(s.trips || [])
@@ -369,6 +385,59 @@ input[type="search"]{-webkit-appearance:none;appearance:none;box-sizing:border-b
 .sx-filter{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin:18px 0 6px}.sx-filter .sx-status{grid-column:1/-1;margin:0;font-size:14px;color:var(--muted)}
 @media(max-width:700px){.sx-filter{grid-template-columns:1fr}}
 .sx-404{padding:90px 0;text-align:center}
+/* Contact page (matches the live /contact design) */
+.ct-hero{background:#163E52;color:#fff;padding:60px 0 64px}
+.ct-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,600px);gap:64px;align-items:start}
+.ct-intro{padding-top:16px;max-width:460px}
+.ct-pill{display:inline-block;padding:8px 14px;border-radius:999px;background:#ffffff14;color:#F8C979;font:600 11px/1 var(--sans);letter-spacing:.11em;text-transform:uppercase;margin-bottom:22px}
+.ct-intro h1,.ct-intro h2{font:500 clamp(34px,4vw,48px)/1.08 var(--serif);letter-spacing:-.015em;margin:0 0 18px;color:#fff}
+.ct-intro p{color:#e3edf0;font-size:16px;line-height:1.65;margin:0 0 26px}
+.ct-actions{display:flex;flex-wrap:wrap;gap:14px}
+.ct-btn{display:inline-flex;align-items:center;justify-content:center;padding:9px 30px;border-radius:999px;font:600 15px/1.4 var(--sans);letter-spacing:.06em;text-decoration:none;border:1px solid}
+.ct-btn.gold{color:#F8C979;border-color:#f8c97980}.ct-btn.gold:hover{background:#f8c9791a}
+.ct-btn.white{color:#fff;border-color:#fff}.ct-btn.white:hover{background:#ffffff14}
+.ct-card{background:#fff;border:1px solid #0000001a;border-radius:16px;padding:40px;color:var(--ink)}
+.ct-form{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.ct-field{position:relative;display:flex;flex-direction:column}.ct-field.full{grid-column:1/-1}
+.ct-field label{position:absolute;top:9px;left:14px;font:600 12px/1.4 var(--sans);letter-spacing:.06em;color:#0009;pointer-events:none}
+.ct-field input,.ct-field textarea{width:100%;min-height:56px;padding:28px 14px 8px;border:1px solid #0000003b;border-radius:4px;background:#fff;font:400 16px/1.4 var(--sans);color:var(--ink);-webkit-appearance:none;appearance:none}
+.ct-field textarea{min-height:120px;resize:vertical}
+.ct-field input:hover,.ct-field textarea:hover{border-color:#000000a0}
+.ct-field input:focus,.ct-field textarea:focus{outline:none;border-color:#C87812;box-shadow:0 0 0 1px #C87812}
+.ct-field input::placeholder{color:#0006}
+.ct-field.invalid input,.ct-field.invalid textarea{border-color:#b3261e}
+.ct-field .sx-error{margin:4px 2px 0}.ct-field .sx-error:empty{display:none}
+.ct-submit{grid-column:1/-1;height:52px;border:0;border-radius:4px;background:#F8C979;color:#000;font:600 16px/1 var(--sans);letter-spacing:.03em;cursor:pointer;box-shadow:0 1px 3px #0000001f}
+.ct-submit:hover{background:#f3bd5f}
+.ct-note,.ct-status{grid-column:1/-1;margin:0;font-size:12px;line-height:1.55;color:#0009}.ct-note a{color:#0009;font-weight:600}
+.ct-status:empty{display:none}.ct-status{color:#1d5b34;font-weight:600}
+@media(max-width:900px){.ct-grid{grid-template-columns:1fr;gap:36px}.ct-intro{max-width:none}}
+@media(max-width:560px){.ct-card{padding:22px}.ct-form{grid-template-columns:1fr}}
+.ct-trust{padding:56px 0}
+.ct-trust ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.ct-trust li{padding:10px;border-radius:12px;background:#fff2de80}
+.ct-trust span{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid #f0d9b4;border-radius:999px;font:600 12.8px/1.2 var(--sans);color:#020506}
+.ct-trust span::before{content:"";width:8px;height:8px;border-radius:50%;background:#E99A2D}
+.ct-steps{background:#EDF6F8;padding:72px 0}
+.ct-steps ol{list-style:none;margin:8px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:40px}
+.ct-num{display:block;font:400 40px/1 var(--serif);color:#b8c4c8;margin-bottom:14px}
+.ct-step-ey{display:block;font:500 11px/1.4 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:#17323E;margin-bottom:10px}
+.ct-steps h3{font:600 clamp(26px,2.6vw,34px)/1.18 var(--serif);letter-spacing:-.01em;margin:0 0 12px;color:#020506}
+.ct-steps li p{margin:0;color:#5D7079;font-size:15.5px;line-height:1.6}
+@media(max-width:820px){.ct-steps ol{grid-template-columns:1fr;gap:28px}}
+.ct-quotes{background:#F7EFE3;padding:72px 0}
+.ct-quotes ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.ct-quote{display:flex;flex-direction:column;background:#fff;border:1px solid #0000001a;border-top:2px solid #f2dcb6;border-radius:12px;padding:22px 24px}
+.ct-mark{font:700 34px/1 var(--serif);color:#E99A2D;opacity:.55;height:22px}
+.ct-quote blockquote{margin:0 0 18px;flex:1}
+.ct-text{margin:0;font-style:italic;font-size:15.5px;line-height:1.75;color:#020506}
+.ct-text.clamp{display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+.ct-more{margin-top:6px;padding:0;border:0;background:none;color:#C87812;font:600 13px var(--sans);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.ct-author{display:flex;align-items:center;gap:12px}
+.ct-avatar{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;flex:none}.ct-avatar i{width:14px;height:14px;border-radius:50%}
+.ct-author strong{display:block;font-size:15px;color:#020506}.ct-author div span{display:block;font-size:12px;letter-spacing:.04em;color:#17323E}
+@media(max-width:960px){.ct-quotes ul{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.ct-quotes ul{grid-template-columns:1fr}}
 /* Team directory (matches the live /team design) */
 .tm{padding:72px 0 56px}.tm-owners{padding-top:24px}
 .tm-head{max-width:640px;margin-bottom:36px}
@@ -464,9 +533,9 @@ const JS = `
       main.innerHTML = '<section class="sx sx-404"><div class="sx-wrap"><h1>Page not found</h1><p class="sx-lead" style="margin:0 auto 18px">We could not find <code>' + esc(r.path) + '</code>. Try searching, or go back to the home page.</p><div class="sx-actions" style="justify-content:center"><a class="sx-btn" href="#/">Home</a><button type="button" class="sx-btn ghost-dark" data-open-search>Search the site</button></div></div></section>';
       doc.title = 'Page not found | Superior Travel Consultants';
     } else {
-      var ids = page.s.concat(r.path === '/contact' || r.path === '/contact-us' ? [] : DATA.cta.s);
+      var ids = page.s.concat(DATA.cta.s);
       pageStyle.textContent = ids.map(function (i) { return DATA.styles[i]; }).join('\\n');
-      var html = page.h + (r.path === '/contact' || r.path === '/contact-us' ? '' : DATA.cta.h);
+      var html = page.h + DATA.cta.h;
       main.innerHTML = html.replace(/st-agent-img:([a-z-]+)/g, function (m, s) { return DATA.img[s] || ''; });
       doc.title = page.t;
       hooks(r);
@@ -526,14 +595,15 @@ const JS = `
       Array.prototype.forEach.call(form.querySelectorAll('input,textarea'), function (f) {
         var out = form.querySelector('[data-error-for="' + f.name + '"]'), msg = '';
         if (!f.validity.valid) msg = f.validity.typeMismatch ? 'Please enter a valid email address.' : 'Please fill in this field.';
+        if (f.parentElement.classList.contains('ct-field')) f.parentElement.classList.toggle('invalid', !!msg);
         if (out) out.textContent = msg;
         if (msg) { f.setAttribute('aria-invalid', 'true'); bad = bad || f; } else f.removeAttribute('aria-invalid');
       });
       if (bad) { bad.focus(); return; }
       var v = function (n) { return form.querySelector('[name=' + n + ']').value.trim(); };
-      var body = v('message') + '\\n\\nName: ' + v('name') + '\\nEmail: ' + v('email') + (v('phone') ? '\\nPhone: ' + v('phone') : '') + (v('dates') ? '\\nTravel dates: ' + v('dates') : '');
+      var body = v('message') + '\\n\\nName: ' + v('first') + ' ' + v('last') + '\\nEmail: ' + v('email') + (v('phone') ? '\\nPhone: ' + v('phone') : '') + (v('dates') ? '\\nTravel dates: ' + v('dates') : '');
       location.href = 'mailto:inquiries@superiortravel.com?subject=' + encodeURIComponent(v('subject')) + '&body=' + encodeURIComponent(body);
-      form.querySelector('.sx-status').textContent = 'Your email app should open with your message ready to send. If it does not, email inquiries@superiortravel.com or call (516) 224-7880.';
+      form.querySelector('.ct-status').textContent = 'Your email app should open with your message ready to send. If it does not, email inquiries@superiortravel.com or call (516) 224-7880.';
     });
   }
 
@@ -568,6 +638,13 @@ const JS = `
       rail.textContent = paused ? 'Play logo animation' : 'Pause logo animation';
     }
     if (e.target.closest('[data-open-search]')) openSearch();
+    var more = e.target.closest('.ct-more');
+    if (more) {
+      var open = more.getAttribute('aria-expanded') !== 'true';
+      more.previousElementSibling.classList.toggle('clamp', !open);
+      more.setAttribute('aria-expanded', String(open));
+      more.textContent = open ? 'Show less' : 'Read more';
+    }
   });
   doc.addEventListener('keydown', function (e) { if (e.key === 'Escape') { var open = doc.querySelector('.menu-toggle[aria-expanded="true"]'); closeMenus(); if (open) open.focus(); } });
   menuBtn.addEventListener('click', function () { var o = nav.classList.toggle('open'); menuBtn.setAttribute('aria-expanded', String(o)); });
