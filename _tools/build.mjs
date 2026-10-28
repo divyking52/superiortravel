@@ -381,7 +381,15 @@ for (const h of hotelsCfg.hotels) {
 // 7. Header navigation (all pages): Trip Types mega menu + published hotels under Featured Resorts.
 const nav = categoriesCfg.navigation;
 const megaColumns = nav.columns
-  .map((col) => ({ title: col.title, items: col.items.filter((id) => catById.has(id)).map((id) => ({ text: catById.get(id).title, link: { href: catById.get(id).url } })) }))
+  .map((col) => ({
+    title: col.title,
+    items: col.items
+      .filter((id) => catById.has(id))
+      .map((id) => {
+        const c = catById.get(id);
+        return { text: c.title, ...(c.navDescription ? { description: c.navDescription } : {}), link: { href: c.url } };
+      }),
+  }))
   .filter((col) => col.items.length);
 function updateHeader(win) {
   const items = win.__ENRICHED_IR__?.header?.center?.navbarItems?.navbarItems;
