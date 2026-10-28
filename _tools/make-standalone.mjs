@@ -50,7 +50,7 @@ const catsByAgent = new Map();
 for (const c of cats) for (const s of c.agents || []) catsByAgent.set(s, [...(catsByAgent.get(s) || []), c]);
 const agentImages = {};
 for (const f of fs.readdirSync(path.join(ROOT, 'media/agents'))) {
-  const m = f.match(/^([a-z-]+)-160\.webp$/);
+  const m = f.match(/^([a-z-]+)-320\.webp$/);
   if (m) agentImages[m[1]] = `data:image/webp;base64,${fs.readFileSync(path.join(ROOT, 'media/agents', f)).toString('base64')}`;
 }
 
@@ -135,18 +135,35 @@ ${s.publishedFlyer?.src ? `<h2>Published flyer</h2>${img(s.publishedFlyer, ' cla
     return wrap(s, `${head(s, first)}<div class="sx-faq">${(s.items || []).map((q) => `<details><summary>${e(tx(q.question))}</summary><p>${e(tx(q.answer))}</p></details>`).join('')}</div>`, 'alt');
   },
   'teams.detailed'(s, first, ctx) {
+    const owners = s.id === 'team-owners';
     const filter = ctx.route === '/team' && s.id === 'team-directory'
       ? `<div class="sx-filter" data-team-filter role="search" aria-label="Find an advisor"><div><label for="tf-name">Search by name</label><input id="tf-name" type="search" autocomplete="off" placeholder="e.g. Carol"></div><div><label for="tf-cat">Trip type</label><select id="tf-cat"><option value="">All advisors</option>${cats.filter((c) => c.agents?.length).map((c) => `<option value="${e(c.id)}">${e(c.title)}</option>`).join('')}</select></div><button type="button" class="sx-btn ghost-dark" data-tf-clear>Clear</button><p class="sx-status" role="status" aria-live="polite"></p></div>`
       : '';
-    return wrap(s, `${head(s, first)}${filter}<ul class="sx-cards sx-agents">${(s.items || [])
+    const level = first ? 'h1' : 'h2';
+    const header = `<header class="tm-head">${tx(s.eyebrow) ? `<span class="tm-pill">${e(tx(s.eyebrow))}</span>` : ''}<${level}>${e(tx(s.title))}</${level}>${tx(s.description) ? `<p>${e(tx(s.description))}</p>` : ''}${s.primaryButton?.link?.href ? `<a class="tm-cta" ${hrefAttr(s.primaryButton.link.href)}>${e(tx(s.primaryButton))}</a>` : ''}</header>`;
+    const pin = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
+    const ext = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>';
+    const cards = (s.items || [])
       .map((a) => {
         const slug = (a.link?.href || '').split('/').pop();
+        const name = tx(a.name);
         const trips = catsByAgent.get(slug) || [];
         const loc = typeof a.location === 'object' ? tx(a.location) : a.location;
         const specs = (a.specialties || []).map((x) => tx(x.title) || x.title).filter(Boolean);
-        return `<li class="sx-card sx-agent" data-agent="${e(slug)}" data-cats="${e(trips.map((c) => c.id).join(' '))}" data-name="${e(tx(a.name).toLowerCase())}">${img({ src: `/media/agents/${slug}-160.webp`, alt: tx(a.name) }, ' width="96" height="120"')}<div><h3><a ${hrefAttr(a.link?.href)}>${e(tx(a.name))}</a></h3><p class="sx-meta">${e([tx(a.role), loc].filter(Boolean).join(' · '))}</p><p>${e(tx(a.bio))}</p>${specs.length ? `<ul class="sx-chips">${specs.map((x) => `<li>${e(x)}</li>`).join('')}</ul>` : ''}${trips.length ? `<p class="sx-meta"><strong>Trip types:</strong> ${trips.map((c) => `<a ${hrefAttr(catUrl(c))}>${e(c.title)}</a>`).join(', ')}</p>` : ''}<p><a ${hrefAttr(a.link?.href)}>View full profile</a> · <a ${hrefAttr(`/contact?agent=${slug}`)}>Plan with ${e(tx(a.name).split(/[\s,]+/)[0])}</a></p></div></li>`;
+        const creds = (a.credentials || []).length;
+        const photo = owners ? imgSrc(a.avatarMedia?.src) : `st-agent-img:${slug}`;
+        return `<li class="tm-card" data-agent="${e(slug)}" data-cats="${e(trips.map((c) => c.id).join(' '))}" data-name="${e(name.toLowerCase())}">
+<div class="tm-photo"><img src="${e(photo)}" alt="${e(a.avatarMedia?.alt || name)}" loading="lazy" decoding="async"></div>
+<div class="tm-body"><h3><a ${hrefAttr(a.link?.href)}>${e(name)}</a></h3>
+<div class="tm-row"><span>${e(tx(a.role))}</span>${creds ? `<span class="tm-creds">${creds} credential${creds > 1 ? 's' : ''}</span>` : ''}</div>
+${loc ? `<p class="tm-loc">${pin}${e(loc)}</p>` : ''}<hr>
+<p class="tm-bio">${e(tx(a.bio))}</p>
+${specs.length ? `<ul class="tm-chips" aria-label="Specialties">${specs.slice(0, 3).map((x) => `<li>${e(x)}</li>`).join('')}</ul>` : ''}
+${trips.length ? `<p class="tm-trips"><strong>Trip types:</strong> ${trips.map((c) => `<a ${hrefAttr(catUrl(c))}>${e(c.title)}</a>`).join(', ')}</p>` : ''}
+<p class="tm-links"><a ${hrefAttr(a.link?.href)}>View full profile${ext}</a><a ${hrefAttr(`/contact?agent=${slug}`)}>Plan with ${e(name.split(/[\s,]+/)[0])}</a></p></div></li>`;
       })
-      .join('')}</ul>`, s.id === 'team-owners' ? 'alt' : '');
+      .join('');
+    return `<section class="sx tm${owners ? ' tm-owners' : ''}" id="${e(s.id)}"><div class="sx-wrap">${header}${filter}<ul class="tm-grid sx-agents">${cards}</ul></div></section>`;
   },
   'teams.spotlight'(s, first, ctx) {
     const a = (s.items || [])[0] || {};
@@ -352,6 +369,37 @@ input[type="search"]{-webkit-appearance:none;appearance:none;box-sizing:border-b
 .sx-filter{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin:18px 0 6px}.sx-filter .sx-status{grid-column:1/-1;margin:0;font-size:14px;color:var(--muted)}
 @media(max-width:700px){.sx-filter{grid-template-columns:1fr}}
 .sx-404{padding:90px 0;text-align:center}
+/* Team directory (matches the live /team design) */
+.tm{padding:72px 0 56px}.tm-owners{padding-top:24px}
+.tm-head{max-width:640px;margin-bottom:36px}
+.tm .sx-filter{margin:0 0 28px}
+.tm-pill{display:inline-block;padding:8px 14px;border-radius:999px;background:#FBE8C9;color:#C87812;font:600 11px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;margin-bottom:18px}
+.tm-head h1,.tm-head h2{font:500 clamp(34px,4vw,48px)/1.1 var(--serif);color:#020506;margin:0 0 14px;letter-spacing:-.01em}
+.tm-head p{font-size:16px;color:#2d3b40;margin:0 0 22px}
+.tm-cta{display:inline-flex;align-items:center;justify-content:center;padding:10px 32px;border-radius:999px;background:#C87812;color:#000;font:600 15px/1.3 var(--sans);text-decoration:none;box-shadow:inset 0 -2px 0 #00000026}
+.tm-cta:hover{filter:brightness(1.08)}
+.tm-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.tm-owners .tm-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:960px){.tm-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.tm-grid,.tm-owners .tm-grid{grid-template-columns:1fr}}
+.tm-card{display:flex;flex-direction:column;background:#fff;border:1px solid #0000001a;border-radius:12px;overflow:hidden}
+.tm-photo{height:clamp(220px,24vw,260px);background:var(--mist)}
+.tm-photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 22%}
+.tm-owners .tm-photo img{object-position:50% 30%}
+.tm-body{display:flex;flex-direction:column;flex:1;padding:20px 20px 22px}
+.tm-body h3{font:600 25px/1.25 var(--serif);margin:0 0 10px;color:#020506}
+.tm-body h3 a{color:inherit;text-decoration:none}.tm-body h3 a:hover{text-decoration:underline}
+.tm-row{display:flex;justify-content:space-between;gap:10px;align-items:baseline;font-size:14.5px;color:#2d3b40}
+.tm-creds{flex:none;color:#C87812;font-size:12px;font-weight:700}
+.tm-loc{display:flex;align-items:center;gap:6px;margin:6px 0 0;font-size:12px;font-weight:500;color:#2d3b40}
+.tm-body hr{border:0;border-top:1px solid #0000001a;margin:14px 0}
+.tm-bio{margin:0 0 14px;font-size:14.5px;line-height:1.6;color:#2d3b40;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tm-chips{list-style:none;margin:0 0 14px;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.tm-chips li{padding:2px 9px;border:1px solid #C87812;border-radius:999px;color:#C87812;font-size:12px;font-weight:600;line-height:1.4}
+.tm-trips{margin:0 0 14px;font-size:13px;color:#2d3b40}.tm-trips a{color:#8a530c}
+.tm-links{margin:auto 0 0;display:flex;flex-wrap:wrap;gap:8px 18px}
+.tm-links a{display:inline-flex;align-items:center;gap:6px;color:#C87812;font-weight:700;font-size:14px;text-decoration:none}
+.tm-links a:hover{text-decoration:underline}
 .loading{padding:120px 24px;text-align:center;color:var(--muted)}
 /* Compact custom-page layouts */
 @media(min-width:900px){.stc .hero,.stc .hero .wrap,.srp .hero,.srp .hero .wrap,.sth .hero,.stc #collection-hero,.stc #collection-hero .wrap{min-height:clamp(420px,62vh,560px)!important}.stc .wrap,.stl .wrap,.srp .wrap,.sth .wrap{padding-top:64px!important;padding-bottom:64px!important}}
@@ -447,14 +495,14 @@ const JS = `
   }
   function teamFilter(box, r) {
     var name = box.querySelector('#tf-name'), cat = box.querySelector('#tf-cat'), status = box.querySelector('.sx-status');
-    var cards = Array.prototype.slice.call(main.querySelectorAll('.sx-agent'));
+    var cards = Array.prototype.slice.call(main.querySelectorAll('.tm-card'));
     function apply() {
       var q = norm(name.value.trim()), c = cat.value, n = 0;
       cards.forEach(function (el) {
         var ok = (!q || norm(el.getAttribute('data-name')).indexOf(q) > -1) && (!c || (' ' + el.getAttribute('data-cats') + ' ').indexOf(' ' + c + ' ') > -1);
         el.hidden = !ok; if (ok) n++;
       });
-      main.querySelectorAll('.sx-agents').forEach(function (ul) { ul.closest('section').hidden = !ul.querySelector('.sx-agent:not([hidden])'); });
+      main.querySelectorAll('.sx-agents').forEach(function (ul) { ul.closest('section').hidden = !ul.querySelector('.tm-card:not([hidden])'); });
       box.closest('section').hidden = false;
       status.textContent = (q || c) ? (n ? 'Showing ' + n + ' of ' + cards.length + ' advisors' + (c ? ' for ' + cat.options[cat.selectedIndex].text : '') + '.' : 'No advisors match. Try another name or trip type.') : '';
     }
