@@ -15,10 +15,43 @@ const catCfg = readJson('content/categories.json');
 // Helpers
 const tx = (v) => (v == null ? '' : typeof v === 'string' ? v : typeof v.text === 'string' ? v.text : '');
 const abs = (src) => (!src ? '' : src.startsWith('/') && !src.startsWith('//') ? `${SITE_ORIGIN}${src}` : src);
+// Storebox media: images in the site's media library (content/media-library.json, saved by
+// _tools/fetch-media-library.mjs) use the library's own links; shared-pool ("global") images use the
+// same media host. Size variants (medium_, large_, …) are kept.
+const library = readJson('content/media-library.json');
+const MEDIA_HOST = library.host;
+const libById = new Map(library.media.map((m) => [m.id, m]));
+const libByName = new Map(library.media.map((m) => [m.filename.toLowerCase(), m]));
+const SIZE_PREFIX = /^(micro|small|medium|large|xlarge|2xlarge)_/;
+const mediaStats = { library: 0, global: 0, missing: new Set() };
+function mediaLink(site, id, file, size) {
+  const variant = (file.match(SIZE_PREFIX) || [])[1];
+  const want = size || variant;
+  if (site === library.website) {
+    const it = libById.get(id);
+    if (!it) return mediaStats.missing.add(`${site}/${id}/${file}`), null;
+    mediaStats.library++;
+    return (want && it.thumbnails[want]) || it.url;
+  }
+  if (site === 'global') {
+    mediaStats.global++;
+    const base = variant ? file.slice(variant.length + 1) : file;
+    return `${MEDIA_HOST}/media/global/${id}/${want ? `${want}_${base.replace(/\.[a-z0-9]+$/i, '.webp')}` : base}`;
+  }
+  return null;
+}
+const MEDIA_URL = /(https?:\/\/(?:www\.)?(?:superiortravel\.com|admin\.storebox\.ai|api\.storebox\.ai|media\.storebox\.ai)|(?<=["'(\s,=]))\/media\/([0-9a-f-]{36}|global)\/([0-9a-f-]{36})\/([^?#"'\s)<>,]+)(?:\?[^"'\s)<>,]*)?/gi;
+const relinkMedia = (text) => text.replace(MEDIA_URL, (m, host, site, id, file) => mediaLink(site.toLowerCase(), id, file) || m);
+const linkFor = (url, size) => {
+  const m = new RegExp(MEDIA_URL.source, 'i').exec(` ${url}`);
+  return (m && mediaLink(m[2].toLowerCase(), m[3], m[4], size)) || url;
+};
+
+const agentPhotos = Object.fromEntries(readJson('content/agents.json').agents.filter((a) => a.photo).map((a) => [a.slug, linkFor(a.photo, 'large')]));
 const AGENT_IMG = /\/media\/agents\/([a-z-]+)-\d+\.webp/;
 const imgSrc = (src) => {
   const m = (src || '').match(AGENT_IMG);
-  return m ? `st-agent-img:${m[1]}` : abs(src);
+  return m && agentPhotos[m[1]] ? agentPhotos[m[1]] : abs(src);
 };
 const hrefAttr = (href) => {
   if (!href) return '';
@@ -67,12 +100,6 @@ const cats = catCfg.navigation.columns.flatMap((c) => c.items).map((id) => catCf
 const catUrl = (c) => (c.page === 'new' ? `/${c.slug}` : c.page);
 const catsByAgent = new Map();
 for (const c of cats) for (const s of c.agents || []) catsByAgent.set(s, [...(catsByAgent.get(s) || []), c]);
-const agentImages = {};
-for (const f of fs.readdirSync(path.join(ROOT, 'media/agents'))) {
-  const m = f.match(/^([a-z-]+)-320\.webp$/);
-  if (m) agentImages[m[1]] = `data:image/webp;base64,${fs.readFileSync(path.join(ROOT, 'media/agents', f)).toString('base64')}`;
-}
-
 // ---------------------------------------------------------------------------------------------
 // Section renderers (Storebox layouts → static HTML)
 const R = {
@@ -212,7 +239,7 @@ ${s.publishedFlyer?.src ? `<h2>Published flyer</h2>${img(s.publishedFlyer, ' cla
         const loc = typeof a.location === 'object' ? tx(a.location) : a.location;
         const specs = (a.specialties || []).map((x) => tx(x.title) || x.title).filter(Boolean);
         const creds = (a.credentials || []).length;
-        const photo = owners ? imgSrc(a.avatarMedia?.src) : `st-agent-img:${slug}`;
+        const photo = owners ? linkFor(abs(a.avatarMedia?.src || ''), 'large') : agentPhotos[slug] || imgSrc(a.avatarMedia?.src);
         return `<li class="tm-card" data-agent="${e(slug)}" data-cats="${e(trips.map((c) => c.id).join(' '))}" data-name="${e(name.toLowerCase())}">
 <div class="tm-photo"><img src="${e(photo)}" alt="${e(a.avatarMedia?.alt || name)}" loading="lazy" decoding="async"></div>
 <div class="tm-body"><h3><a ${hrefAttr(a.link?.href)}>${e(name)}</a></h3>
@@ -318,12 +345,15 @@ const search = index.entries.map((x) => {
 });
 
 const names = Object.fromEntries(readJson('assets/st-agents.json').agents.map((a) => [a.slug, a.name.split(',')[0]]));
-const payload = { pages, styles, cta: { h: cta.html, s: cta.ids }, search, img: agentImages, names };
+for (const p of pages) p.h = relinkMedia(p.h);
+styles.forEach((css, i) => (styles[i] = relinkMedia(css)));
+cta.html = relinkMedia(cta.html);
+const payload = { pages, styles, cta: { h: cta.html, s: cta.ids }, search, names };
 const packed = zlib.gzipSync(Buffer.from(JSON.stringify(payload)), { level: 9 }).toString('base64');
 
 // ---------------------------------------------------------------------------------------------
 // Shell: header navigation and footer from the site's header/footer data.
-const logo = `data:image/png;base64,${fs.readFileSync(path.join(ROOT, 'logos/1476896544.5688176.png')).toString('base64')}`;
+const logo = libByName.get('1476896544-5688176.png')?.url || `data:image/png;base64,${fs.readFileSync(path.join(ROOT, 'logos/1476896544.5688176.png')).toString('base64')}`;
 const navItems = ir.header.center.navbarItems.navbarItems;
 const navHtml = navItems
   .map((item, i) => {
@@ -421,7 +451,7 @@ nav.main .menu-cols a[aria-current="page"] .menu-name{color:var(--gold-ink)}
 .sx-chips{list-style:none;margin:6px 0 8px;padding:0;display:flex;flex-wrap:wrap;gap:6px}.sx-chips li{font-size:11px;font-weight:600;color:#7a4c12;background:#FBE8C9;border-radius:999px;padding:3px 9px}
 .sx-badges{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:10px 26px;font-weight:600}.sx-badges li::before{content:"✓ ";color:var(--gold)}
 .sx-split{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}@media(max-width:820px){.sx-split{grid-template-columns:1fr}}
-.sx-split img{border-radius:14px;width:100%}.sx-portrait{max-width:420px}
+.sx-split img{border-radius:14px;width:100%}.sx-portrait{max-width:420px;aspect-ratio:4/5;object-fit:cover;object-position:50% 22%}
 .sx-facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin:16px 0}.sx-facts div{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}.sx-facts dt{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-ink)}.sx-facts dd{margin:0;font-weight:600}
 .sx-list{margin:8px 0 18px;padding-left:20px}.sx-list li{margin-bottom:6px}
 .sx-timeline{list-style:none;margin:18px 0 0;padding:0;border-left:3px solid #FBE8C9}.sx-timeline li{padding:0 0 18px 18px}
@@ -640,7 +670,7 @@ const JS = `
       var ids = page.s.concat(DATA.cta.s);
       pageStyle.textContent = ids.map(function (i) { return DATA.styles[i]; }).join('\\n');
       var html = page.h + DATA.cta.h;
-      main.innerHTML = html.replace(/st-agent-img:([a-z-]+)/g, function (m, s) { return DATA.img[s] || ''; });
+      main.innerHTML = html;
       doc.title = page.t;
       hooks(r);
     }
@@ -888,3 +918,5 @@ ${footerCols}
 write('standalone/superior-travel.html', html);
 const raw = Buffer.byteLength(JSON.stringify(payload));
 console.log(`standalone/superior-travel.html — ${(Buffer.byteLength(html) / 1024).toFixed(0)} KB (${pages.length} pages; content ${(raw / 1024).toFixed(0)} KB compressed into the file, ${styles.length} shared style blocks).`);
+console.log(`Storebox media links: ${mediaStats.library} from the media library, ${mediaStats.global} from the shared media pool.`);
+if (mediaStats.missing.size) console.log(`Not in the media library (links left unchanged): ${[...mediaStats.missing].join(', ')}`);

@@ -1,16 +1,16 @@
 {
-  "$comment": "Per-agent settings for the agent directory and category pages. Specialty (category) assignments live on each category in categories.json (ordered list `agents`). Profile data (name, photo, role, bio, listed specialties) comes from the Storebox team page data. `clientName` records the spelling in the client's brief where it differs from the published profile; confirm with the client.",
+  "$comment": "Per-agent settings for the agent directory and category pages. Specialty (category) assignments live on each category in categories.json (ordered list `agents`). Profile data (name, photo, role, bio, listed specialties) comes from the Storebox team page data. `clientName` records the spelling in the client's brief where it differs from the published profile; confirm with the client. `photo` is the Storebox media link of the portrait used by the standalone file (the same image the published team page uses).",
   "agents": [
-    { "slug": "carol-mcparland" },
-    { "slug": "james-mcparland" },
-    { "slug": "robin-holian" },
-    { "slug": "lois-howes" },
-    { "slug": "lynne-kaplan" },
-    { "slug": "fran-lozano" },
-    { "slug": "izabela-melli" },
-    { "slug": "renata-boulos" },
-    { "slug": "mary-susan-schilling", "clientName": "Mary Schilling" },
-    { "slug": "heather-hamann" },
-    { "slug": "blake-rehfield", "clientName": "Blake Rehrfield" }
+    { "slug": "carol-mcparland", "photo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/34b6b083-accf-496b-9210-7e25d0c7ea4f/carol-mcparland-owner-card.jpg" },
+    { "slug": "james-mcparland", "photo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/7eba193f-b3b8-4dbd-bb05-2220df37fc4d/james-mcparland-owner-card.jpg" },
+    { "slug": "robin-holian", "photo": "https://media.storebox.ai/media/global/331375bf-191e-4a0c-a0f4-13c22be96b01/superior-main-4474a670b4f742.webp" },
+    { "slug": "lois-howes", "photo": "https://media.storebox.ai/media/global/def4106c-d57d-4c1d-b333-e0817b3bb181/superior-main-8497ba4fb8d6cb.webp" },
+    { "slug": "lynne-kaplan", "photo": "https://media.storebox.ai/media/global/04006133-c710-4466-9b69-5a6a3cf6a16d/superior-main-b129044290aac4.webp" },
+    { "slug": "fran-lozano", "photo": "https://media.storebox.ai/media/global/ccf8feac-1356-4a0f-9d3c-1bbffc4b840d/superior-main-55db85fcbe9d44.webp" },
+    { "slug": "izabela-melli", "photo": "https://media.storebox.ai/media/global/fd65fd9e-509e-400a-b2ca-b803fdecc9a9/superior-main-27a38d0ae5b428.webp" },
+    { "slug": "renata-boulos", "photo": "https://media.storebox.ai/media/global/eddec4af-ec52-4294-ac15-a809813c0a51/superior-main-d803c5d24bae10.webp" },
+    { "slug": "mary-susan-schilling", "clientName": "Mary Schilling", "photo": "https://media.storebox.ai/media/global/87556497-c3dc-4056-9780-b4f3d30a9dd4/superior-main-e94648ae77c584.webp" },
+    { "slug": "heather-hamann", "photo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/83044dc9-8d0b-4c57-b9f7-153abb5f8913/Heather-Profile-Picture.jpeg" },
+    { "slug": "blake-rehfield", "clientName": "Blake Rehrfield", "photo": "https://media.storebox.ai/media/global/7c869e83-8f77-4ce2-97b0-9cb0244902ef/superior-main-d70858175b7fd2.webp" }
   ]
 }
