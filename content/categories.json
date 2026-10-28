@@ -1,0 +1,176 @@
+{
+  "$comment": "Travel categories (trip types). Edit, reorder, publish/unpublish here, then run `node _tools/build.mjs`. `page: \"new\"` generates a landing page at /<slug>; `page: \"/existing-url\"` points the category at an existing page and appends an advisor section to it. `related` must only list URLs that already exist on the site. `intro` copy is pending client approval (see _tools/reports/build-report.md).",
+  "navigation": {
+    "menuLabel": "Trip Types",
+    "menuHref": "/cruises",
+    "columns": [
+      { "title": "Find Your Kind of Trip", "items": ["cruises", "river-cruises", "family-vacations", "disney-vacations", "romantic-escapes", "honeymoons"] },
+      { "title": "Luxury & Special Interest", "items": ["luxury-escapes", "luxury-travel", "adventure-travel", "wine-culinary-travel", "religious-jewish-travel"] },
+      { "title": "Plan It Your Way", "items": ["build-your-own-experience", "entertainment-tickets"] }
+    ]
+  },
+  "categories": [
+    {
+      "id": "cruises",
+      "title": "Cruises",
+      "status": "published",
+      "page": "/cruises",
+      "existing": true,
+      "navDescription": "Ocean and river journeys",
+      "keywords": ["cruise", "cruises", "cruise line", "ship", "sailing", "shore excursion", "cabin"]
+    },
+    {
+      "id": "romantic-escapes",
+      "title": "Romantic Escapes",
+      "status": "published",
+      "page": "/romance",
+      "existing": true,
+      "navDescription": "Honeymoons and time away for two",
+      "keywords": ["romantic", "romance", "couples", "anniversary", "adults-only"]
+    },
+    {
+      "id": "family-vacations",
+      "title": "Family Vacations",
+      "status": "published",
+      "page": "/family-vacations",
+      "existing": true,
+      "navDescription": "Time together, thoughtfully planned",
+      "keywords": ["family", "families", "kids", "multigenerational", "children"]
+    },
+    {
+      "id": "luxury-escapes",
+      "title": "Luxury Escapes",
+      "status": "published",
+      "page": "/luxury",
+      "existing": true,
+      "navDescription": "Elevated stays and tailored journeys",
+      "keywords": ["luxury", "suite", "five-star", "private"]
+    },
+    {
+      "id": "adventure-travel",
+      "title": "Adventure Travel",
+      "status": "published",
+      "page": "new",
+      "slug": "adventure-travel",
+      "intro": "Meet the Superior Travel advisors who plan adventure travel, explore related guides from our team, and share your ideas through our trip-planning form.",
+      "agents": ["lynne-kaplan", "heather-hamann", "james-mcparland"],
+      "related": [
+        "/safaris-honeymoons",
+        "/travel-journal/lynne-kenya-vs-tanzania-safari",
+        "/travel-journal/lynne-african-safari-cost",
+        "/travel-journal/fran-catamaran-charter",
+        "/destinations/antarctica"
+      ],
+      "keywords": ["adventure", "safari", "expedition", "trekking", "hiking", "catamaran", "antarctica"]
+    },
+    {
+      "id": "religious-jewish-travel",
+      "title": "Religious/Jewish Travel",
+      "status": "published",
+      "page": "new",
+      "slug": "religious-jewish-travel",
+      "intro": "Meet the Superior Travel advisors who plan religious and Jewish travel, and share your plans through our trip-planning form.",
+      "agents": ["blake-rehfield", "lois-howes"],
+      "related": [],
+      "keywords": ["religious", "jewish", "faith", "heritage", "kosher", "israel", "pilgrimage"]
+    },
+    {
+      "id": "wine-culinary-travel",
+      "title": "Wine & Culinary Travel",
+      "status": "published",
+      "page": "new",
+      "slug": "wine-culinary-travel",
+      "intro": "Meet the Superior Travel advisors who plan wine and culinary travel, explore related reading from our team, and share your ideas through our trip-planning form.",
+      "agents": ["carol-mcparland", "izabela-melli"],
+      "related": [
+        "/blogs/cuisine-to-caftans-explore-new-cultural-heritage-sites-around-the-world",
+        "/blogs/your-pto-is-going-places-with-delta-vacations",
+        "/european-vacation-packages"
+      ],
+      "keywords": ["wine", "culinary", "food", "cuisine", "cooking class", "vineyard", "tasting", "gastronomy"]
+    },
+    {
+      "id": "disney-vacations",
+      "title": "Disney Vacations",
+      "status": "published",
+      "page": "/disney-vacation-packages",
+      "agents": ["mary-susan-schilling", "blake-rehfield"],
+      "keywords": ["disney", "walt disney world", "disneyland", "theme park", "disney cruise"]
+    },
+    {
+      "id": "entertainment-tickets",
+      "title": "Entertainment Tickets",
+      "status": "published",
+      "page": "new",
+      "slug": "entertainment-tickets",
+      "intro": "Meet the Superior Travel advisors who help with entertainment tickets, explore destinations from our travel guides, and share your plans through our trip-planning form.",
+      "agents": ["lois-howes", "fran-lozano", "robin-holian"],
+      "related": [
+        "/destinations/north-america/new-york-city",
+        "/destinations/north-america/las-vegas",
+        "/destinations/europe/london"
+      ],
+      "keywords": ["entertainment", "tickets", "broadway", "theater", "show", "concert", "event"]
+    },
+    {
+      "id": "river-cruises",
+      "title": "River Cruises",
+      "status": "published",
+      "page": "/escorted-tours-river-cruises",
+      "agents": ["lois-howes", "robin-holian", "fran-lozano"],
+      "keywords": ["river cruise", "river cruises", "danube", "rhine", "viking", "amawaterways", "escorted tour"]
+    },
+    {
+      "id": "build-your-own-experience",
+      "title": "Build Your Own Experience",
+      "status": "published",
+      "page": "new",
+      "slug": "build-your-own-experience",
+      "intro": "Meet the Superior Travel advisors who build custom itineraries, read how our team approaches personal trip planning, and share your ideas through our trip-planning form.",
+      "agents": ["izabela-melli", "lynne-kaplan", "fran-lozano"],
+      "related": [
+        "/long-island-travel-agency",
+        "/travel-journal/heather-travel-agent-vs-booking-yourself",
+        "/travel-journal/heather-group-travel-planning-checklist",
+        "/blogs/what-does-a-travel-agent-do"
+      ],
+      "keywords": ["custom", "customized", "tailored", "itinerary", "build your own", "personalized"]
+    },
+    {
+      "id": "luxury-travel",
+      "title": "Luxury Travel",
+      "status": "published",
+      "page": "new",
+      "slug": "luxury-travel",
+      "intro": "Meet the Superior Travel advisors who plan luxury travel, explore our luxury pages and featured resorts, and share your plans through our trip-planning form.",
+      "agents": ["carol-mcparland", "robin-holian", "renata-boulos"],
+      "related": [
+        "/luxury",
+        "/luxury-hotels-resorts",
+        "/sandals-royal-plantation",
+        "/sandals-regency-la-toc",
+        "/golf-resorts-travel"
+      ],
+      "includePublishedHotels": true,
+      "keywords": ["luxury", "five-star", "suite", "butler", "fine hotel", "private"]
+    },
+    {
+      "id": "honeymoons",
+      "title": "Honeymoons",
+      "status": "published",
+      "page": "new",
+      "slug": "honeymoons",
+      "intro": "Meet the Superior Travel advisors who plan honeymoons, explore honeymoon and romantic-travel guides from our team, and share your plans through our trip-planning form.",
+      "agents": ["carol-mcparland", "robin-holian", "renata-boulos"],
+      "related": [
+        "/romance",
+        "/travel-journal/renata-honeymoon-packages",
+        "/travel-journal/lynne-safari-and-beach-honeymoon",
+        "/travel-journal/james-antigua-vs-barbados-for-couples",
+        "/romantic-getaways",
+        "/blogs/anniversary-valentines-getaways"
+      ],
+      "keywords": ["honeymoon", "honeymoons", "newlyweds", "romantic", "couples"]
+    }
+  ]
+}

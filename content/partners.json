@@ -1,0 +1,253 @@
+{
+  "$comment": "Travel partners shown on /partners (featured logo wall + directory) and in the homepage logo rail (featured, in order). Add, edit, reorder or remove entries here, then run `node _tools/build.mjs`. `website` is optional: when set, the logo links to it in a new tab; leave empty until the client confirms the correct destination URL. Directory descriptions are partner-supplied text and are published as-is.",
+  "featured": [
+    {
+      "name": "Royal Caribbean",
+      "logo": "https://admin.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/8e3c98a6-9383-47c8-bf73-b2eca84cc4f2/royal-caribbean-v2.png",
+      "alt": "Royal Caribbean logo",
+      "website": ""
+    },
+    {
+      "name": "Virgin Voyages",
+      "logo": "https://admin.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/41a79cd4-bf74-4bd3-a150-d602bac26c1b/virgin-voyages-v2.png",
+      "alt": "Virgin Voyages logo",
+      "website": ""
+    },
+    {
+      "name": "Norwegian Cruise Line",
+      "logo": "https://admin.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/ecae8e0e-dea7-427e-b5eb-3ee28a08e464/norwegian-cruise-line-v2.png",
+      "alt": "Norwegian Cruise Line logo",
+      "website": ""
+    },
+    {
+      "name": "Carnival Cruise Line",
+      "logo": "https://admin.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/cca94d31-d397-48be-9dcd-3afd468b2690/carnival-cruise-line-v2.png",
+      "alt": "Carnival Cruise Line logo",
+      "website": ""
+    },
+    {
+      "name": "AmaWaterways",
+      "logo": "https://admin.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/6f46f440-0afb-4aa3-b9e2-4e73534782cd/amawaterways-v2.png",
+      "alt": "AmaWaterways logo",
+      "website": ""
+    },
+    {
+      "name": "Viking",
+      "logo": "https://admin.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/aa6fa8d4-c7e5-4452-9ac8-aa7cfe918eca/viking-v2.png",
+      "alt": "Viking logo",
+      "website": ""
+    },
+    {
+      "name": "Sandals Resorts",
+      "logo": "https://admin.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/afb0c3da-a1ba-492f-89d8-50211a423192/sandals-v2.png",
+      "alt": "Sandals Resorts logo",
+      "website": ""
+    },
+    {
+      "name": "Beaches Resorts",
+      "logo": "https://admin.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/3f800c00-f42b-49e8-8913-19f580410249/beaches-v2.png",
+      "alt": "Beaches Resorts logo",
+      "website": ""
+    },
+    {
+      "name": "Disney Destinations",
+      "logo": "https://admin.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/cd613866-dc19-4d05-92c0-06b28c24c643/disney-destinations-v2.png",
+      "alt": "Disney Destinations logo",
+      "website": ""
+    }
+  ],
+  "directory": [
+    {
+      "name": "Celebrity Cruises",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/104a6cfb-6782-4717-a5c5-0310a8894a2f/superior-original-celebrity-cruises.png",
+      "alt": "Celebrity Cruises",
+      "description": "Celebrity Cruises exists because we believe in opening up the world. We know that travel makes us better—every one of us. We’re here to help vacationers...",
+      "enquiryLink": "/contact?partner=celebrity-cruises",
+      "website": ""
+    },
+    {
+      "name": "Classic Vacations",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/ddd8f12b-b259-4cdb-92db-9e518e9471ff/superior-original-classic-vacations.png",
+      "alt": "Classic Vacations",
+      "description": "Elevate Your Journey with Classic Vacations®At Classic Vacations, we believe travel should be as unique as you are. Our curated luxury experiences are...",
+      "enquiryLink": "/contact?partner=classic-vacations",
+      "website": ""
+    },
+    {
+      "name": "Europe Express",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/bd6b3e0e-9114-4866-83b3-0449ad66152e/superior-original-europe-express.png",
+      "alt": "Europe Express",
+      "description": "Create a Custom Europe Vacation with the Europe ExpertsDiscover the best of Europe with hand-selected accommodations, private, small-group and shared...",
+      "enquiryLink": "/contact?partner=europe-express",
+      "website": ""
+    },
+    {
+      "name": "G Adventures",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/8dcbaca3-2435-408b-9410-464c8078b676/superior-original-g-adventures.png",
+      "alt": "G Adventures",
+      "description": "Why travel with G Adventures?Travel that goes way beyond travellingCall us crazy, but we’ve always believed travel shouldn’t just feel like a break. It...",
+      "enquiryLink": "/contact?partner=gadventures",
+      "website": ""
+    },
+    {
+      "name": "Globus",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/bd1f9954-fa16-483f-8a47-92ec72b01cd0/superior-original-globus.png",
+      "alt": "Globus",
+      "description": "IT’S TIME … The time is now. It’s time to trade someone else’s dreams for yours. Time to trade “have tos” for “must-sees;” to exchange cutting corners for...",
+      "enquiryLink": "/contact?partner=globus",
+      "website": ""
+    },
+    {
+      "name": "HX",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/d787f5bb-1de7-4d34-b209-9d430b64ccdb/superior-original-hx.png",
+      "alt": "HX",
+      "description": "Since 1896, HX has been taking curious travelers on mindful expeditions to the world's most remote and awe-inspiring destinations. Today, we're the...",
+      "enquiryLink": "/contact?partner=hx",
+      "website": ""
+    },
+    {
+      "name": "Melia",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/c5858ac5-da01-42b7-a50c-cfce3f738e16/superior-original-melia.png",
+      "alt": "Melia",
+      "description": "Paradisus by Meliá: A New Era of All-Inclusive LuxuryAt Paradisus by Meliá, all-inclusive luxury is Designed by Destination—an approach that begins with...",
+      "enquiryLink": "/contact?partner=melia",
+      "website": ""
+    },
+    {
+      "name": "Pleasant Holidays",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/4d4d780b-f121-4703-87a3-a1c12606fd24/superior-original-pleasant-holidays.png",
+      "alt": "Pleasant Holidays",
+      "description": "Everything you need—flights, resort and cruise accommodations, car rentals, commissionable activities, travel protection and more—in one convenient location.",
+      "enquiryLink": "/contact?partner=pleasant-holidays",
+      "website": ""
+    },
+    {
+      "name": "Railbookers",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/b05e852b-5aba-410e-9794-4f19c5d89b11/superior-original-railbookers.png",
+      "alt": "Railbookers",
+      "description": "Your trip, your way with RailbookersIf a train goes there, Railbookers probably does, too. With its incredible selection of meticulously crafted...",
+      "enquiryLink": "/contact?partner=railbookers",
+      "website": ""
+    },
+    {
+      "name": "Rocky Mountaineer",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/6bf360e5-c262-47fa-859e-c2d366dff9c6/superior-original-rocky-mountaineer.png",
+      "alt": "Rocky Mountaineer",
+      "description": "Experience the ultimate in luxury train travel with Rocky Mountaineer! Embark on a journey like no other as you traverse through some of North...",
+      "enquiryLink": "/contact?partner=rocky-mountaineer",
+      "website": ""
+    },
+    {
+      "name": "Scenic Cruises",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/83bf2f1e-d288-4899-a837-fb7420f7535a/superior-original-scenic-cruises.png",
+      "alt": "Scenic Cruises",
+      "description": "Scenic Discovery Yacht CruisingSetting the benchmark in ultra-luxury ocean cruising, Scenic Eclipse seamlessly blends the sleek design of a superyacht with...",
+      "enquiryLink": "/contact?partner=scenic-cruises",
+      "website": ""
+    },
+    {
+      "name": "Seabourn",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/facf3fa5-e737-401c-a368-4ca28405751b/superior-original-seabourn.png",
+      "alt": "Seabourn",
+      "description": "We at Seabourn are enthusiastic travelers. We think that leisure travel has a redeeming quality that improves people's lives.",
+      "enquiryLink": "/contact?partner=seabourn",
+      "website": ""
+    },
+    {
+      "name": "Silversea",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/4a616fc7-4f0c-49b3-87f5-2258a450ddfa/superior-original-silversea.png",
+      "alt": "Silversea",
+      "description": "Silversea is renowned for exploring the world’s most remote and iconic destinations across all seven continents. Its fleet of 12 luxury classic ships,...",
+      "enquiryLink": "/contact?partner=silversea",
+      "website": ""
+    },
+    {
+      "name": "Tourism Calgary",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/e00e9658-6a8a-4495-b91c-126f9b51fe07/superior-original-tourism-calgary.png",
+      "alt": "Tourism Calgary",
+      "description": "Connect with Tourism Calgary to access destination expertise, itinerary ideas, and resources to help you create unforgettable Calgary experiences for your...",
+      "enquiryLink": "/contact?partner=tourism-calgary",
+      "website": ""
+    },
+    {
+      "name": "Travel Impressions",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/99977f55-8170-411c-8bf7-26baeb3fff99/superior-original-travel-impressions.png",
+      "alt": "Travel Impressions",
+      "description": "Founded in 1974, Travel Impressions is one of the nation's largest leisure tour operators, offering packaged and FIT vacations to over 1,300...",
+      "enquiryLink": "/contact?partner=travel-impressions",
+      "website": ""
+    },
+    {
+      "name": "Windstar",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/b443f44c-a425-4971-9887-c649bef27f3c/superior-original-windstar.png",
+      "alt": "Windstar",
+      "description": "Perfectly Sized, For The Best Experience at SeaAll cruise ships let you see the world. Only Windstar’s private yacht style cruises brings you close enough...",
+      "enquiryLink": "/contact?partner=windstar",
+      "website": ""
+    },
+    {
+      "name": "Royal Caribbean",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/7928500e-150a-443d-a10a-b0e486493fbd/superior-original-royal-caribbean.png",
+      "alt": "Royal Caribbean",
+      "description": "Plan Royal Caribbean travel with a Superior Travel Consultants advisor.",
+      "enquiryLink": "/contact?partner=royal-caribbean",
+      "website": ""
+    },
+    {
+      "name": "Virgin Voyages",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/ff7b9aac-8821-43f7-8ebd-93ea2f2a2268/superior-original-virgin-voyages.png",
+      "alt": "Virgin Voyages",
+      "description": "Plan Virgin Voyages travel with a Superior Travel Consultants advisor.",
+      "enquiryLink": "/contact?partner=virgin-voyages",
+      "website": ""
+    },
+    {
+      "name": "Norwegian Cruise Line",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/312858ad-5e26-4907-9431-c7e757949343/superior-original-norwegian-cruise-line.png",
+      "alt": "Norwegian Cruise Line",
+      "description": "Plan Norwegian Cruise Line travel with a Superior Travel Consultants advisor.",
+      "enquiryLink": "/contact?partner=norwegian-cruise-line",
+      "website": ""
+    },
+    {
+      "name": "Carnival Cruise Line",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/12b28578-f5b7-4070-b7ef-7c773c2264bf/superior-original-carnival-cruise-line.png",
+      "alt": "Carnival Cruise Line",
+      "description": "Plan Carnival Cruise Line travel with a Superior Travel Consultants advisor.",
+      "enquiryLink": "/contact?partner=carnival-cruise-line",
+      "website": ""
+    },
+    {
+      "name": "AmaWaterways",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/e914c62a-2b01-4e35-bc0a-5d43c15e4509/superior-original-amawaterways.png",
+      "alt": "AmaWaterways",
+      "description": "Plan AmaWaterways travel with a Superior Travel Consultants advisor.",
+      "enquiryLink": "/contact?partner=amawaterways",
+      "website": ""
+    },
+    {
+      "name": "Viking",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/37f0317d-4855-458e-9fd1-f2fff7fa6655/superior-original-viking.png",
+      "alt": "Viking",
+      "description": "Plan Viking travel with a Superior Travel Consultants advisor.",
+      "enquiryLink": "/contact?partner=viking",
+      "website": ""
+    },
+    {
+      "name": "Sandals & Beaches Resorts",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/6da351a1-98ef-42d3-8304-c2fbe37f6737/superior-original-sandals-beaches-resorts.png",
+      "alt": "Sandals & Beaches Resorts",
+      "description": "Plan Sandals & Beaches Resorts travel with a Superior Travel Consultants advisor.",
+      "enquiryLink": "/contact?partner=sandals-beaches-resorts",
+      "website": ""
+    },
+    {
+      "name": "Disney Destinations",
+      "logo": "https://media.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/a8a75a51-57e4-49d1-b913-6ad1f804e9d7/superior-original-disney-destinations.png",
+      "alt": "Disney Destinations",
+      "description": "Plan Disney Destinations travel with a Superior Travel Consultants advisor.",
+      "enquiryLink": "/contact?partner=disney-destinations",
+      "website": ""
+    }
+  ]
+}

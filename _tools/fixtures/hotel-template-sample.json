@@ -1,0 +1,22 @@
+{
+  "slug": "template-sample",
+  "name": "Sample Hotel Name",
+  "status": "sample",
+  "location": { "area": "Sample City", "country": "Sample Country", "address": "Sample address line" },
+  "overview": "SAMPLE OVERVIEW — replace with the client-supplied or verified hotel description. This paragraph shows how the overview text wraps at a comfortable reading width.\n\nA second paragraph shows paragraph spacing.",
+  "photos": [
+    { "src": "https://admin.storebox.ai/media/global/b67463cc-d35e-4d18-bfd3-3e1621cddb6b/superior-main-36174929574121.webp", "alt": "Sample image for layout review only", "credit": "Sample credit", "approved": true, "width": 1200, "height": 900 },
+    { "src": "https://admin.storebox.ai/media/global/b67463cc-d35e-4d18-bfd3-3e1621cddb6b/superior-main-36174929574121.webp", "alt": "Sample gallery image 1", "caption": "Sample caption", "credit": "Sample credit", "approved": true },
+    { "src": "https://admin.storebox.ai/media/global/b67463cc-d35e-4d18-bfd3-3e1621cddb6b/superior-main-36174929574121.webp", "alt": "Sample gallery image 2", "approved": true }
+  ],
+  "amenities": ["Sample amenity one", "Sample amenity two", "Sample amenity three", "Sample amenity four"],
+  "offers": [
+    { "title": "Sample current offer", "promo": "Sample discount wording", "details": "Sample offer details supplied by the client.", "validUntil": "2099-12-31", "terms": "Sample terms and conditions." },
+    { "title": "Sample expired offer (hidden automatically)", "promo": "Should not appear", "validUntil": "2020-01-01" }
+  ],
+  "faqs": [
+    { "question": "Sample question one?", "answer": "Sample answer supplied by the client." },
+    { "question": "Sample question two?", "answer": "Another sample answer." }
+  ],
+  "specialist": "carol-mcparland"
+}

@@ -35,8 +35,26 @@ http
     const url = new URL(req.url, 'http://localhost');
     const { file, blocked: isBlocked } = resolve(url.pathname);
     if (file) {
-      res.writeHead(200, { 'content-type': types[path.extname(file)] || 'application/octet-stream', 'cache-control': 'no-cache' });
+      const type = types[path.extname(file)] || 'application/octet-stream';
+      res.writeHead(200, { 'content-type': type, 'cache-control': 'no-cache' });
+      if (type.startsWith('text/html')) {
+        // Keep local previews out of the production Google Analytics / Clarity data (preview only;
+        // files on disk are unchanged).
+        res.end(
+          fs.readFileSync(file, 'utf8')
+            .replace('https://www.googletagmanager.com/gtag/js?id=', 'data:text/javascript,//analytics-disabled-in-preview?')
+            .replace("'https://www.clarity.ms/tag/", "'data:text/javascript,//clarity-disabled-in-preview?"),
+        );
+        return;
+      }
       fs.createReadStream(file).pipe(res);
+      return;
+    }
+    // Production 301-redirects legacy top-level blog paths to /blogs/<slug>.
+    const legacy = url.pathname.match(/^\/([a-z0-9-]+)\/?$/);
+    if (legacy && fs.existsSync(path.join(ROOT, 'blogs', `${legacy[1]}.html`))) {
+      res.writeHead(301, { location: `/blogs/${legacy[1]}${url.search}` });
+      res.end();
       return;
     }
     if (!isBlocked && path.extname(url.pathname)) {

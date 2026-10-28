@@ -1,0 +1,108 @@
+/* Superior Travel site enhancements: accessibility, motion, spacing, search and agent directory.
+   Loaded on every page after the Storebox styles. */
+
+/* ---------- Utilities ---------- */
+.st-vh,.stx .st-vh{position:absolute!important;width:1px!important;height:1px!important;margin:-1px!important;padding:0!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important;border:0!important}
+[hidden]{display:none!important}
+
+/* ---------- Skip link & focus ---------- */
+.st-skip-link{position:fixed;left:12px;top:-60px;z-index:3000;background:#163E52;color:#fff;padding:10px 16px;border-radius:8px;font:600 14px/1.2 "Work Sans",system-ui,sans-serif;text-decoration:none;transition:top .15s ease}
+.st-skip-link:focus{top:12px;outline:3px solid #C87812;outline-offset:2px}
+#main-content:focus{outline:none}
+#root a:focus-visible,#root button:focus-visible,#root [role="button"]:focus-visible,#root input:focus-visible,#root select:focus-visible,#root textarea:focus-visible,#root summary:focus-visible,#root [tabindex]:not([tabindex="-1"]):focus-visible{outline:3px solid #C87812!important;outline-offset:2px!important}
+
+/* ---------- Scroll-reveal: content is always visible (no fade/slide delays) ---------- */
+[data-st-reveal]{opacity:1!important;transform:none!important}
+[data-layout-id="banner.hero.background-parallax"] [style*="height:120%"]{transform:none!important}
+
+/* ---------- Back to top (existing Storebox button, made visible on light backgrounds) ---------- */
+div:has(> button[aria-label="Back to top"]){z-index:1050!important;right:20px!important;bottom:20px!important}
+button[aria-label="Back to top"]{width:48px!important;height:48px!important;background:#163E52!important;color:#fff!important;border:2px solid #fff!important;box-shadow:0 6px 18px rgba(10,30,40,.3)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+button[aria-label="Back to top"]:hover,button[aria-label="Back to top"]:focus-visible{background:#C87812!important;color:#111!important;transform:none!important}
+@media (max-width:600px){div:has(> button[aria-label="Back to top"]){right:14px!important;bottom:14px!important}}
+
+/* ---------- Agent directory cards: smaller photos, no zoom/lift ---------- */
+.team-member-card,.team-member-card:hover{transform:none!important}
+.team-member-card img,.team-member-card:hover img,.team-member-card .team-member-image,.team-member-card:hover .team-member-image{transform:none!important;transition:none!important}
+.team-member-card img{object-fit:cover!important;object-position:50% 22%!important}
+.team-member-card > div:first-child:has(> img){height:clamp(220px,24vw,260px)!important;min-height:0!important;aspect-ratio:auto!important}
+.team-member-card > div:first-child:has(> img) > img{height:100%!important;width:100%!important}
+[data-st-highlight] .team-member-card{box-shadow:0 0 0 3px #C87812,0 10px 28px rgba(200,120,18,.22)!important}
+
+/* ---------- Compact layout: shorter heroes and section spacing on custom pages ---------- */
+@media (min-width:900px){
+  .stc .hero,.stc .hero .wrap,.srp .hero,.srp .hero .wrap,.sth .hero,.stc #collection-hero,.stc #collection-hero .wrap{min-height:clamp(420px,62vh,560px)!important}
+  .stc .wrap,.stl .wrap,.srp .wrap,.sth .wrap{padding-top:64px!important;padding-bottom:64px!important}
+  .stc .experience{min-height:220px!important}
+  .stc .related{min-height:150px!important}
+}
+@media (max-width:899px){
+  .stc .hero,.stc .hero .wrap,.srp .hero,.srp .hero .wrap,.sth .hero,.stc #collection-hero,.stc #collection-hero .wrap{min-height:0!important}
+  .stc .wrap,.stl .wrap,.srp .wrap,.sth .wrap{padding-top:44px!important;padding-bottom:44px!important}
+}
+
+/* ---------- Homepage partner logo rail: pause control ---------- */
+.sth .logos-viewport:focus-within .logos,.sth .logos-viewport.st-paused .logos{animation-play-state:paused!important}
+.st-rail-toggle{display:inline-flex;align-items:center;gap:6px;margin:14px 0 0;padding:6px 12px;border:1px solid #c9d3d6;border-radius:999px;background:#fff;color:#17323e;font:600 12px/1.2 "Work Sans",system-ui,sans-serif;cursor:pointer}
+.st-rail-toggle:hover{border-color:#C87812}
+.st-rail-toggle:focus-visible{outline:3px solid #C87812;outline-offset:2px}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+  .st-rail-toggle{display:none!important}
+}
+
+/* ---------- Header search trigger ---------- */
+.st-search-trigger{display:inline-flex;align-items:center;justify-content:center;flex:none;width:44px;height:44px;margin-right:4px;padding:0;border:1px solid #e3d9c8;border-radius:999px;background:#fff;color:#17323E;cursor:pointer}
+.st-search-trigger:hover{background:#FBE8C9;border-color:#C87812}
+.st-search-trigger:focus-visible{outline:3px solid #C87812;outline-offset:2px}
+.st-search-trigger svg{width:20px;height:20px;flex:none}
+.st-search-trigger .st-search-trigger__label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- Search dialog ---------- */
+.st-search{width:min(760px,calc(100vw - 24px));max-height:min(86vh,820px);margin:6vh auto auto;padding:0;border:0;border-radius:16px;background:#FFFCF7;color:#17323E;box-shadow:0 24px 70px rgba(10,30,40,.35);font:15px/1.55 "Work Sans",system-ui,sans-serif}
+.st-search::backdrop{background:rgba(9,28,38,.55)}
+.st-search *{box-sizing:border-box}
+.st-search__panel{display:flex;flex-direction:column;max-height:min(86vh,820px)}
+.st-search__head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px 0}
+.st-search__head h2{margin:0;font:500 24px/1.1 "EB Garamond",Georgia,serif}
+.st-search__close{width:40px;height:40px;border:0;border-radius:10px;background:transparent;color:#17323E;font-size:24px;line-height:1;cursor:pointer}
+.st-search__close:hover{background:#EDF6F8}
+.st-search__form{display:flex;gap:8px;padding:12px 18px 6px;flex-wrap:wrap}
+.st-search__form input,.st-search__form select{font:inherit;color:#17323E;border:1px solid #b9c7cb;border-radius:10px;background:#fff;min-height:46px;padding:10px 12px}
+.st-search__form input{flex:1 1 300px;font-size:16px}
+.st-search__form select{flex:0 1 190px}
+.st-search :focus-visible{outline:3px solid #C87812;outline-offset:2px}
+.st-search__status{margin:0;padding:4px 18px 8px;font-size:13px;color:#5D7079}
+.st-search__results{list-style:none;margin:0;padding:0 10px 14px;overflow-y:auto;overscroll-behavior:contain}
+.st-search__results li{margin:0}
+.st-search__results a{display:block;padding:12px 10px;border-radius:10px;color:inherit;text-decoration:none;border-bottom:1px solid #e8eeef}
+.st-search__results a:hover,.st-search__results a:focus-visible{background:#EDF6F8}
+.st-search__type{display:block;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#a66b1f}
+.st-search__title{display:block;font:500 20px/1.2 "EB Garamond",Georgia,serif;margin:2px 0 3px}
+.st-search__excerpt{display:block;font-size:13.5px;color:#4a5f68}
+.st-search__cats{display:block;margin-top:4px;font-size:12px;color:#5D7079}
+.st-search mark{background:#FBE8C9;color:inherit;border-radius:3px;padding:0 1px}
+.st-search__more{margin:0 18px 16px;align-self:flex-start;padding:9px 14px;border:1px solid #b9c7cb;border-radius:10px;background:#fff;font:600 13px/1 "Work Sans",system-ui,sans-serif;color:#17323E;cursor:pointer}
+.st-search__empty{padding:6px 18px 18px}
+.st-search__empty p{margin:0 0 10px}
+.st-search__chips{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.st-search__chips a{display:inline-block;padding:7px 12px;border:1px solid #d7dfe1;border-radius:999px;background:#fff;color:#17323E;text-decoration:none;font-size:13px;font-weight:600}
+.st-search__chips a:hover{border-color:#C87812}
+@media (max-width:600px){.st-search{margin-top:0;max-height:100vh;width:100vw;max-width:100vw;border-radius:0;height:100%}.st-search__panel{max-height:100vh;height:100%}}
+
+/* ---------- Agent directory filter (/team) ---------- */
+.st-agent-filter{margin:0 0 28px;padding:18px;border:1px solid #dce6e8;border-radius:14px;background:#fff;font:15px/1.5 "Work Sans",system-ui,sans-serif;color:#17323E}
+.st-agent-filter h2{margin:0 0 12px;font:500 24px/1.1 "EB Garamond",Georgia,serif}
+.st-agent-filter__row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:end}
+.st-agent-filter label{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
+.st-agent-filter select,.st-agent-filter input{width:100%;font:inherit;color:#17323E;border:1px solid #b9c7cb;border-radius:10px;background:#fff;min-height:44px;padding:9px 11px}
+.st-agent-filter select:focus-visible,.st-agent-filter input:focus-visible,.st-agent-filter button:focus-visible,.st-agent-filter a:focus-visible{outline:3px solid #C87812;outline-offset:2px}
+.st-agent-filter__status{margin:12px 0 0;font-size:14px;line-height:2}
+.st-agent-filter__status:empty{display:none}
+.st-agent-filter__status a{margin-left:10px;color:#a66b1f;font-weight:600}
+.st-agent-filter__status .st-agent-filter__clear{margin-left:10px}
+.st-agent-filter__clear{padding:6px 12px;border:1px solid #b9c7cb;border-radius:999px;background:#fff;font:600 12px/1 "Work Sans",system-ui,sans-serif;color:#17323E;cursor:pointer}
+.st-agent-filter__empty{margin:12px 0 0;padding:12px 14px;border-radius:10px;background:#fff8ec;color:#7a4c12}
+@media (max-width:760px){.st-agent-filter__row{grid-template-columns:1fr}}

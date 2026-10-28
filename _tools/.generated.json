@@ -1,0 +1,27 @@
+{
+  "files": [
+    "data/adventure-travel.js",
+    "adventure-travel.html",
+    "data/religious-jewish-travel.js",
+    "religious-jewish-travel.html",
+    "data/wine-culinary-travel.js",
+    "wine-culinary-travel.html",
+    "data/entertainment-tickets.js",
+    "entertainment-tickets.html",
+    "data/build-your-own-experience.js",
+    "build-your-own-experience.html",
+    "data/luxury-travel.js",
+    "luxury-travel.html",
+    "data/honeymoons.js",
+    "honeymoons.html"
+  ],
+  "routes": [
+    "/adventure-travel",
+    "/religious-jewish-travel",
+    "/wine-culinary-travel",
+    "/entertainment-tickets",
+    "/build-your-own-experience",
+    "/luxury-travel",
+    "/honeymoons"
+  ]
+}

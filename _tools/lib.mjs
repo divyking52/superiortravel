@@ -11,7 +11,16 @@ export const read = (p) => fs.readFileSync(path.isAbsolute(p) ? p : path.join(RO
 export const write = (p, s) => {
   const abs = path.isAbsolute(p) ? p : path.join(ROOT, p);
   fs.mkdirSync(path.dirname(abs), { recursive: true });
-  fs.writeFileSync(abs, s);
+  for (let attempt = 1; ; attempt++) {
+    try {
+      fs.writeFileSync(abs, s);
+      return;
+    } catch (err) {
+      // Windows can briefly lock files (indexer/antivirus); retry before giving up.
+      if (attempt >= 5 || !['UNKNOWN', 'EBUSY', 'EPERM'].includes(err.code)) throw err;
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 200 * attempt);
+    }
+  }
 };
 export const readJson = (p) => JSON.parse(read(p));
 

@@ -1,0 +1,120 @@
+{
+  "$comment": "Luxury hotel & resort listings. Only entries with status \"published\" AND all required verified fields are generated as public pages, added to the sitemap and search. Drafts render only as private previews under /_drafts/ (noindex, not linked, excluded from deploys). Required to publish: overview, location, at least one approved photo with credit/permission, specialist or general contact. Offers need `validUntil` (YYYY-MM-DD); expired offers are hidden automatically. Do not enter unverified facts.",
+  "defaults": {
+    "contact": { "label": "Superior Travel Consultants", "email": "inquiries@superiortravel.com", "phone": "(516) 224-7880" }
+  },
+  "hotels": [
+    {
+      "slug": "unico-20-87-hotel-riviera-maya",
+      "name": "UNICO 20°87° Hotel Riviera Maya",
+      "status": "draft",
+      "location": { "area": "Riviera Maya", "country": "Mexico" },
+      "categories": ["luxury-travel"],
+      "overview": "",
+      "photos": [],
+      "amenities": [],
+      "offers": [],
+      "faqs": [],
+      "specialist": "",
+      "notes": "Awaiting client-supplied overview, approved photography, amenities, offers and FAQs."
+    },
+    {
+      "slug": "london-marriott-hotel-grosvenor-square",
+      "name": "London Marriott Hotel Grosvenor Square",
+      "status": "draft",
+      "location": { "area": "London", "country": "United Kingdom" },
+      "categories": ["luxury-travel"],
+      "overview": "",
+      "photos": [],
+      "amenities": [],
+      "offers": [],
+      "faqs": [],
+      "specialist": "",
+      "notes": "Awaiting client-supplied overview, approved photography, amenities, offers and FAQs."
+    },
+    {
+      "slug": "ritz-carlton-new-york-central-park",
+      "name": "The Ritz-Carlton New York, Central Park",
+      "status": "draft",
+      "location": { "area": "New York", "country": "United States" },
+      "categories": ["luxury-travel"],
+      "overview": "",
+      "photos": [],
+      "amenities": [],
+      "offers": [],
+      "faqs": [],
+      "specialist": "",
+      "notes": "Awaiting client-supplied overview, approved photography, amenities, offers and FAQs."
+    },
+    {
+      "slug": "lotte-palace-new-york",
+      "name": "Lotte Palace",
+      "status": "draft",
+      "location": { "area": "New York", "country": "United States" },
+      "categories": ["luxury-travel"],
+      "overview": "",
+      "photos": [],
+      "amenities": [],
+      "offers": [],
+      "faqs": [],
+      "specialist": "",
+      "notes": "Confirm the property's official name for publication (client brief: \"Lotte Palace, New York\"). Awaiting overview, photography, amenities, offers and FAQs."
+    },
+    {
+      "slug": "the-knickerbocker-hotel-new-york",
+      "name": "The Knickerbocker Hotel",
+      "status": "draft",
+      "location": { "area": "New York", "country": "United States" },
+      "categories": ["luxury-travel"],
+      "overview": "",
+      "photos": [],
+      "amenities": [],
+      "offers": [],
+      "faqs": [],
+      "specialist": "",
+      "notes": "Awaiting client-supplied overview, approved photography, amenities, offers and FAQs."
+    },
+    {
+      "slug": "the-norman-london",
+      "name": "The Norman",
+      "status": "draft",
+      "location": { "area": "London", "country": "United Kingdom" },
+      "categories": ["luxury-travel"],
+      "overview": "",
+      "photos": [],
+      "amenities": [],
+      "offers": [],
+      "faqs": [],
+      "specialist": "",
+      "notes": "Confirm the exact property and city with the client before publishing (client brief: \"The Norman, London\"). Awaiting all content."
+    },
+    {
+      "slug": "the-londoner-london",
+      "name": "The Londoner",
+      "status": "draft",
+      "location": { "area": "London", "country": "United Kingdom" },
+      "categories": ["luxury-travel"],
+      "overview": "",
+      "photos": [],
+      "amenities": [],
+      "offers": [],
+      "faqs": [],
+      "specialist": "",
+      "notes": "Awaiting client-supplied overview, approved photography, amenities, offers and FAQs."
+    },
+    {
+      "slug": "the-mayfair-london",
+      "name": "The Mayfair",
+      "status": "draft",
+      "location": { "area": "London", "country": "United Kingdom" },
+      "categories": ["luxury-travel"],
+      "overview": "",
+      "photos": [],
+      "amenities": [],
+      "offers": [],
+      "faqs": [],
+      "specialist": "",
+      "notes": "Client must confirm the exact property before publishing (brief: \"The Mayfair, London — confirm the exact property\"). Slug may change once confirmed."
+    }
+  ]
+}

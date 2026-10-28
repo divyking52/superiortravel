@@ -1,0 +1,16 @@
+{
+  "$comment": "Per-agent settings for the agent directory and category pages. Specialty (category) assignments live on each category in categories.json (ordered list `agents`). Profile data (name, photo, role, bio, listed specialties) comes from the Storebox team page data. `clientName` records the spelling in the client's brief where it differs from the published profile; confirm with the client.",
+  "agents": [
+    { "slug": "carol-mcparland" },
+    { "slug": "james-mcparland" },
+    { "slug": "robin-holian" },
+    { "slug": "lois-howes" },
+    { "slug": "lynne-kaplan" },
+    { "slug": "fran-lozano" },
+    { "slug": "izabela-melli" },
+    { "slug": "renata-boulos" },
+    { "slug": "mary-susan-schilling", "clientName": "Mary Schilling" },
+    { "slug": "heather-hamann" },
+    { "slug": "blake-rehfield", "clientName": "Blake Rehrfield" }
+  ]
+}
