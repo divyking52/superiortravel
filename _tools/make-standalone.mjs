@@ -283,7 +283,7 @@ async function embeddedFonts() {
 const FONTS = await embeddedFonts();
 
 const CSS = `
-:root{--ink:#17323E;--muted:#5D7079;--navy:#163E52;--gold:#C87812;--gold-ink:#8a530c;--cream:#FFFCF7;--mist:#EDF6F8;--line:#dce6e8;--serif:"EB Garamond",Garamond,Georgia,"Times New Roman",serif;--sans:"Work Sans",system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+:root{--header-h:0px;--claim-banner-h:0px;--ink:#17323E;--muted:#5D7079;--navy:#163E52;--gold:#C87812;--gold-ink:#8a530c;--cream:#FFFCF7;--mist:#EDF6F8;--line:#dce6e8;--serif:"EB Garamond",Garamond,Georgia,"Times New Roman",serif;--sans:"Work Sans",system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
 *{box-sizing:border-box}html{scroll-padding-top:84px}body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.6 var(--sans)}
 img{max-width:100%;height:auto}a{color:inherit}[hidden]{display:none!important}
 :focus-visible{outline:3px solid var(--gold);outline-offset:3px}
