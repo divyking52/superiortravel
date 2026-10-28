@@ -41,6 +41,25 @@ const head = (s, h1) => {
 };
 const wrap = (s, inner, cls = '') => `<section class="sx ${cls}"${s.id ? ` id="${e(s.id)}"` : ''}><div class="sx-wrap">${inner}</div></section>`;
 const fmtDate = (iso) => (iso ? new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }) : '');
+// Same text extraction and 250-words-per-minute estimate as the live blog (style text included).
+const plainText = (html) =>
+  String(html || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+const readMinutes = (html) => {
+  const words = plainText(html).split(/\s+/).filter(Boolean).length;
+  return words ? Math.max(1, Math.ceil(words / 250)) : null;
+};
+const blogImage = (it, size) => {
+  const fi = typeof it.featured_image === 'string' ? it.featured_image : it.featured_image?.src;
+  const og = [it.metadata?.og_image, it.metadata?.featured_image].find((m) => m && typeof m === 'object' && m.thumbnails);
+  if (og && (!fi || fi.includes(og.id))) return abs(og.thumbnails[size] || og.thumbnails.large || og.file_url);
+  const md = typeof it.metadata?.featured_image === 'string' ? it.metadata.featured_image : '';
+  return abs(fi || md);
+};
+const timeTag = (iso) => `<time datetime="${e(iso)}" data-local-date>${e(fmtDate(iso))}</time>`;
 const list = (arr) => (arr?.length ? `<ul class="sx-list">${arr.map((x) => `<li>${e(tx(x))}</li>`).join('')}</ul>` : '');
 
 // Advisor data (corrected team page) and client-supplied trip-type assignments.
@@ -73,20 +92,46 @@ const R = {
     return wrap(s, `${head(s, first)}<ul class="sx-cards sx-plain">${(s.items || []).map((it) => `<li class="sx-card"><div><h3>${e(tx(it.title))}</h3><p>${e(tx(it.description))}</p></div></li>`).join('')}</ul>`, 'alt');
   },
   hubList(s, first) {
-    return wrap(s, `${head(s, first)}<ul class="sx-cards">${(s.items || [])
+    const level = first ? 'h1' : 'h2';
+    const cardLevel = first ? 'h2' : 'h3';
+    const items = s.items || [];
+    const cards = items
       .map((it) => {
-        const fi = it.featured_image || it.metadata?.featured_image || it.metadata?.og_image;
-        const src = typeof fi === 'string' ? fi : fi?.thumbnails?.medium || fi?.file_url || fi?.url;
-        return `<li class="sx-card">${src ? `<img src="${e(abs(src))}" alt="" loading="lazy" decoding="async">` : ''}<div><span class="sx-meta">${e(fmtDate(it.published_at))}</span><h3><a ${hrefAttr(it.url)}>${e(it.title)}</a></h3><p>${e(it.excerpt || '')}</p></div></li>`;
+        const src = blogImage(it, 'large');
+        const excerpt = plainText(it.excerpt || '') || plainText(it.content || '').slice(0, 150);
+        const mins = Number(it.metadata?.read_time) || (it.content ? readMinutes(it.content) : null);
+        return `<li><a class="bl-card" ${hrefAttr(it.url || `/blogs/${it.slug}`)}>${src ? `<img src="${e(src)}" alt="" loading="lazy" decoding="async">` : '<span class="bl-noimg" aria-hidden="true"></span>'}<span class="bl-body"><${cardLevel} class="bl-card-title">${e(it.title)}</${cardLevel}>${excerpt ? `<span class="bl-excerpt">${e(excerpt)}</span>` : ''}<span class="bl-meta">${it.published_at ? `<span>${timeTag(it.published_at)}</span>` : ''}${it.published_at && mins ? '<span aria-hidden="true">·</span>' : ''}${mins ? `<span>${mins} min read</span>` : ''}</span></span></a></li>`;
       })
-      .join('')}</ul>`);
+      .join('');
+    return `<section class="bl" id="${e(s.id)}"><div class="bl-wrap"><header class="bl-head"><${level}>${e(tx(s.title))}</${level}>${tx(s.subtitle) ? `<p>${e(tx(s.subtitle))}</p>` : ''}</header>${items.length ? `<ul class="bl-grid">${cards}</ul>` : '<p class="bl-empty">No items yet. Check back soon!</p>'}</div></section>`;
   },
   blogPost(s) {
     const b = s.blogPost || {};
-    const fi = b.metadata?.featured_image;
-    const src = fi?.thumbnails?.large || fi?.file_url;
-    const hasH1 = /<h1[\s>]/i.test(b.content || '');
-    return `<article class="sx sx-article"><div class="sx-wrap narrow"><p class="sx-meta"><a href="#/blogs">Blog</a> · ${e(fmtDate(b.published_at))}</p>${hasH1 ? '' : `<h1>${e(b.title)}</h1>`}${src ? `<img class="sx-feature" src="${e(abs(src))}" alt="" decoding="async">` : ''}<div class="sx-prose">${b.content || ''}</div></div></article>`;
+    const md = b.metadata || {};
+    const hub = s.parentHub?.url ? s.parentHub : { url: '/blogs', title: 'Blog' };
+    const src = blogImage(b, 'xlarge');
+    const published = b.published_at || b.created_at;
+    const label = tx(md.hero_date_label).trim();
+    const dateHtml = label ? `<span>${e(label)}</span>` : published ? `<span data-published>${timeTag(published)}</span>` : '';
+    const isUpdated = b.updated_at && (!published || new Date(b.updated_at) > new Date(published));
+    const mins = md.hero_read_time ?? readMinutes(b.content || '');
+    const meta = [tx(md.hero_author).trim() ? `<span class="bp-author">${e(tx(md.hero_author).trim())}</span>` : '', dateHtml, isUpdated ? `<span data-updated>Updated ${timeTag(b.updated_at)}</span>` : '', mins ? `<span>${e(String(mins))} min read</span>` : '']
+      .filter(Boolean)
+      .join('<span class="bp-sep" aria-hidden="true">·</span>');
+    const url = `${SITE_ORIGIN}${hub.url.replace(/\/$/, '')}/${b.slug}`;
+    const share = (cls) => `<div class="bp-share ${cls}" role="group" aria-label="Share this article">
+<a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&amp;text=${encodeURIComponent(b.title || '')}" target="_blank" rel="noopener noreferrer" aria-label="Share on Twitter (opens in a new tab)"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M23.95 4.57a10 10 0 0 1-2.82.77 4.96 4.96 0 0 0 2.16-2.72c-.95.56-2 .96-3.12 1.19a4.92 4.92 0 0 0-8.39 4.48A13.98 13.98 0 0 1 1.64 3.16a4.92 4.92 0 0 0 1.52 6.57 4.9 4.9 0 0 1-2.23-.62v.06a4.92 4.92 0 0 0 3.95 4.83 5 5 0 0 1-2.21.08 4.94 4.94 0 0 0 4.6 3.42A9.87 9.87 0 0 1 0 19.54a14 14 0 0 0 7.56 2.21c9.05 0 14-7.5 14-13.98l-.02-.64A9.94 9.94 0 0 0 24 4.59z"/></svg></a>
+<a href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}" target="_blank" rel="noopener noreferrer" aria-label="Share on LinkedIn (opens in a new tab)"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05a3.74 3.74 0 0 1 3.37-1.85c3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg></a>
+<a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}" target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook (opens in a new tab)"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M24 12.07C24 5.41 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.8V24C19.62 23.1 24 18.1 24 12.07z"/></svg></a>
+<button type="button" data-copy-link="${e(url)}" aria-label="Copy link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
+</div>`;
+    return `<article class="bp" id="${e(s.id)}"><div class="bp-wrap"><div class="bp-main">${share('bp-share-top')}
+<a class="bp-back" ${hrefAttr(hub.url)}>← ${e(hub.title || 'Blog')}</a>
+${tx(md.hero_eyebrow) ? `<span class="bp-eyebrow">${e(tx(md.hero_eyebrow))}</span>` : ''}<h1>${e(b.title)}</h1>${meta ? `<div class="bp-meta">${meta}</div>` : ''}
+${src ? `<img class="bp-feature" src="${e(src)}" alt="${e(b.featured_image?.alt || b.title || '')}" decoding="async">` : ''}
+<div class="bp-content">${b.content || ''}</div>
+<hr class="bp-rule"><p class="bp-foot"><a ${hrefAttr('/blogs')}><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>Back to All Articles</a></p><p class="bp-copied" role="status" aria-live="polite"></p>
+</div><aside class="bp-rail">${share('bp-share-side')}</aside></div></article>`;
   },
   contact(s, first) {
     const level = first ? 'h1' : 'h2';
@@ -323,23 +368,24 @@ img{max-width:100%;height:auto}a{color:inherit}[hidden]{display:none!important}
 .vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:-1px;padding:0;border:0}
 .skip{position:fixed;left:12px;top:-60px;z-index:100;background:var(--navy);color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none;font-weight:600}.skip:focus{top:12px}
 /* Header */
-header.site{position:sticky;top:0;z-index:40;background:#fffcf7f5;border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
-header.site .bar{display:flex;align-items:center;gap:12px;width:min(1120px,100%);margin:0 auto;padding:8px 24px;min-height:68px}
-.brand{display:flex;align-items:center;flex:none}.brand img{width:56px;height:auto}
-nav.main{margin:0 auto}nav.main>ul{list-style:none;margin:0;padding:0;display:flex;align-items:center;gap:2px}
-nav.main a,.menu-toggle{display:flex;align-items:center;gap:4px;padding:10px 12px;border-radius:10px;text-decoration:none;font:500 15px/1.2 var(--sans);color:var(--ink);background:none;border:0;cursor:pointer}
-nav.main a:hover,.menu-toggle:hover{background:#c878120f}nav.main a[aria-current="page"]{color:var(--gold-ink);text-decoration:underline;text-underline-offset:6px}
-.menu-toggle svg{width:16px;height:16px}.menu-toggle[aria-expanded="true"] svg{transform:rotate(180deg)}
+header.site{position:sticky;top:0;z-index:40;background:#fffcf7f2;box-shadow:0 10px 15px -3px #0000001a,0 4px 6px -2px #0000000d;backdrop-filter:blur(8px)}
+header.site .bar{display:flex;align-items:center;gap:12px;width:100%;margin:0;padding:8px 16px;min-height:58px}
+.brand{display:flex;align-items:center;flex:none}.brand img{width:45px;height:auto}
+nav.main{margin-left:20px}nav.main>ul{list-style:none;margin:0;padding:0;display:flex;align-items:center;gap:0}
+nav.main a,.menu-toggle{display:flex;align-items:center;gap:6px;padding:8px clamp(8px,calc((100vw - 930px) / 14),22px);border-radius:4px;text-decoration:none;font:500 16px/1.4 var(--sans);letter-spacing:.06em;color:#020506;background:none;border:0;cursor:pointer;white-space:nowrap}
+nav.main a:hover,.menu-toggle:hover{background:#c878120a}nav.main a[aria-current="page"]{color:var(--gold-ink)}
+.menu-toggle svg{width:18px;height:18px}.menu-toggle[aria-expanded="true"] svg{transform:rotate(180deg)}
 .has-menu{position:relative}
 .menu-panel{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 40px #0a1e2826;padding:16px 18px;min-width:280px;width:max-content;max-width:min(760px,92vw)}
 .menu-cols{display:flex;gap:28px}.menu-cols ul{list-style:none;margin:0;padding:0}.menu-cols a{padding:7px 8px!important;font-size:14.5px!important}
+.menu-panel a{letter-spacing:normal;white-space:normal}
 .menu-title{margin:0 0 4px 8px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-ink)}
 .menu-overview{margin:0 0 8px;border-bottom:1px solid var(--line);padding-bottom:8px}
 .actions{display:flex;gap:8px;margin-left:auto}
 .icon-btn{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:999px;border:1px solid #e3d9c8;background:#fff;color:var(--ink);cursor:pointer}
 .icon-btn:hover{border-color:var(--gold);background:#FBE8C9}.icon-btn svg{width:20px;height:20px}
 .menu-btn{display:none}
-@media(max-width:1060px){.menu-btn{display:inline-grid}nav.main{position:absolute;left:0;right:0;top:100%;background:var(--cream);border-bottom:1px solid var(--line);max-height:calc(100vh - 70px);overflow:auto;display:none}nav.main.open{display:block}nav.main>ul{flex-direction:column;align-items:stretch;padding:8px 16px 18px}.menu-panel{position:static;transform:none;box-shadow:none;border:0;padding:0 0 8px 12px;width:auto;max-width:none}.menu-cols{flex-direction:column;gap:6px}}
+@media(max-width:1060px){.menu-btn{display:inline-grid}nav.main{margin-left:0;position:absolute;left:0;right:0;top:100%;background:var(--cream);border-bottom:1px solid var(--line);max-height:calc(100vh - 70px);overflow:auto;display:none}nav.main.open{display:block}nav.main>ul{flex-direction:column;align-items:stretch;padding:8px 16px 18px}.menu-panel{position:static;transform:none;box-shadow:none;border:0;padding:0 0 8px 12px;width:auto;max-width:none}.menu-cols{flex-direction:column;gap:6px}}
 /* Rendered sections */
 .sx{padding:52px 0}.sx.alt{background:var(--mist)}.sx.tight{padding:28px 0}
 .sx-wrap{width:min(1120px,100%);margin:0 auto;padding:0 24px}.sx-wrap.narrow{width:min(860px,100%)}
@@ -370,7 +416,53 @@ nav.main a:hover,.menu-toggle:hover{background:#c878120f}nav.main a[aria-current
 .sx-faq details{background:#fff;border:1px solid var(--line);border-radius:10px;margin-bottom:8px}.sx-faq summary{cursor:pointer;padding:14px 16px;font-weight:600}.sx-faq details p{padding:0 16px 14px;margin:0}
 .sx-gallery{list-style:none;margin:18px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}.sx-gallery img{border-radius:12px;width:100%}.sx-gallery figure{margin:0}.sx-gallery figcaption{font-size:13px;color:var(--muted)}
 .sx-flyer{max-width:520px;border-radius:12px}
-.sx-article .sx-feature{width:100%;border-radius:14px;margin:12px 0 22px}
+/* Blog listing and posts (match the live /blogs design) */
+.bl{background:#fff;padding:64px 0 96px}
+.bl-wrap{width:min(1200px,100%);margin:0 auto;padding:0 32px}
+.bl-head{text-align:center;margin-bottom:64px}
+.bl-head h1,.bl-head h2{font:500 clamp(32px,3.2vw,39px)/1 var(--serif);letter-spacing:-.015em;color:#020506;margin:0}
+.bl-head p{color:#0009;margin:12px 0 0}
+.bl-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:48px}
+.bl-card{display:block;background:#fff;text-decoration:none;color:inherit;overflow:hidden}
+.bl-card img,.bl-noimg{display:block;width:100%;aspect-ratio:1200/630;object-fit:contain}
+.bl-noimg{background:#f5f5f5}
+.bl-body{display:block;padding:24px}
+.bl-card-title{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin:0 0 12px;font:600 20px/1.3 var(--serif);color:#000000e6;transition:color .2s}
+.bl-card:hover .bl-card-title{color:#000000d9;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
+.bl-excerpt{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin:0 0 16px;font-size:16px;line-height:1.6;color:#0009}
+.bl-meta{display:flex;align-items:center;gap:12px;font-size:14px;color:#00000080}
+.bl-empty{text-align:center;padding:64px 24px;color:#0009;font-size:18px}
+@media(max-width:1199px){.bl-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:899px){.bl-grid{gap:32px}.bl{padding:48px 0 64px}.bl-wrap{padding:0 16px}}
+@media(max-width:599px){.bl-grid{grid-template-columns:1fr}}
+.bp{background:#fff;display:flex;justify-content:center;padding:64px 0 24px}
+.bp-wrap{width:100%;max-width:1008px;display:grid;grid-template-columns:minmax(0,1fr) 80px;gap:48px}
+.bp-back{display:inline-flex;align-items:center;gap:4px;margin-bottom:24px;font-size:14px;color:#17323E;text-decoration:none}.bp-back:hover{color:#020506;text-decoration:underline}
+.bp-eyebrow{display:block;width:max-content;font:600 12px/1.4 var(--sans);letter-spacing:1.2px;text-transform:uppercase;color:#346C8D;background:#F7EFE3;padding:5px 14px;border-radius:100px;margin-bottom:20px}
+.bp h1{font:800 clamp(36px,4.3vw,54px)/.9 var(--serif);letter-spacing:-1px;color:#17323E;margin:0 0 24px;text-wrap:balance}
+.bp-meta{display:flex;flex-wrap:wrap;align-items:center;gap:12px;font-size:14px;color:#00000080;padding-bottom:32px}
+.bp-author{font-weight:500;color:#000000b3}
+.bp-feature{display:block;width:100%;height:auto;margin:0 0 40px}
+.bp-content{color:#17323E;font:400 18px/1.75 var(--sans);letter-spacing:-.003em}
+.bp-content h1,.bp-content h2,.bp-content h3,.bp-content h4,.bp-content h5,.bp-content h6{color:#17323E;font-family:var(--serif);font-weight:700;letter-spacing:-.5px;margin:32px 0 16px}
+.bp-content p{margin:0 0 16px}
+.bp-content a{color:#000c;text-decoration:underline;text-decoration-color:#0000004d;text-underline-offset:2px}.bp-content a:hover{color:#000000e6;text-decoration-color:#0009}
+.bp-content img{max-width:100%;height:auto;margin:24px 0}
+.bp-content ul,.bp-content ol{padding-left:16px;margin:0 0 16px}.bp-content li{margin-bottom:8px}
+.bp-content blockquote{border-left:3px solid #000c;padding:4px 0 4px 20px;margin:24px 0;font-style:italic;color:#0009}
+.bp-content table{width:100%;border-collapse:collapse;display:block;overflow-x:auto}
+.bp-rule{border:0;border-top:1px solid #0000001a;margin:40px 0}
+.bp-foot{text-align:center;padding:24px 0;margin:0}
+.bp-foot a{display:inline-flex;align-items:center;gap:8px;color:#0009;font-size:14px;font-weight:500;text-decoration:none}.bp-foot a:hover{color:#000000e6}.bp-foot a:hover svg{transform:translateX(-3px)}.bp-foot svg{transition:transform .2s}
+.bp-copied{text-align:center;font-size:13px;color:#1d5b34;margin:0}.bp-copied:empty{display:none}
+.bp-rail{position:sticky;top:96px;align-self:start}
+.bp-share{display:flex;flex-direction:column;align-items:center;gap:4px}
+.bp-share a,.bp-share button{display:inline-grid;place-items:center;width:42px;height:42px;border-radius:50%;border:0;background:none;color:#00000080;cursor:pointer}
+.bp-share a:hover,.bp-share button:hover{color:#000000d9;background:#0000000a}
+.bp-share svg{width:18px;height:18px}
+.bp-share-top{display:none}
+@media(max-width:1199px){.bp-wrap{max-width:820px;grid-template-columns:1fr;gap:0;padding:0 24px}.bp-rail{display:none}.bp-share-top{display:flex;flex-direction:row;justify-content:center;margin-bottom:24px}.bp{padding-top:48px}}
+@media(max-width:599px){.bp-wrap{padding:0 16px}}
 .sx-prose{font-size:17px;line-height:1.7}.sx-prose img{border-radius:12px}.sx-prose table{width:100%;border-collapse:collapse;display:block;overflow-x:auto}
 blockquote{margin:0}blockquote footer{font-size:13px;color:var(--muted);margin-top:8px}
 .sx-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px}
@@ -561,6 +653,18 @@ const JS = `
     if (filter) teamFilter(filter, r);
     var form = main.querySelector('[data-mailto-form]');
     if (form) contactForm(form, r);
+    localDates();
+  }
+  function localDates() {
+    main.querySelectorAll('time[data-local-date]').forEach(function (t) {
+      t.textContent = new Date(t.getAttribute('datetime')).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    });
+    var upd = main.querySelector('[data-updated]'), pub = main.querySelector('[data-published]');
+    if (upd && pub && upd.textContent === 'Updated ' + pub.textContent) {
+      var sep = upd.previousElementSibling;
+      if (sep && sep.classList.contains('bp-sep')) sep.remove();
+      upd.remove();
+    }
   }
   function teamFilter(box, r) {
     var name = box.querySelector('#tf-name'), cat = box.querySelector('#tf-cat'), status = box.querySelector('.sx-status');
@@ -638,6 +742,13 @@ const JS = `
       rail.textContent = paused ? 'Play logo animation' : 'Pause logo animation';
     }
     if (e.target.closest('[data-open-search]')) openSearch();
+    var copy = e.target.closest('[data-copy-link]');
+    if (copy) {
+      var note = doc.querySelector('.bp-copied');
+      var done = function (ok) { if (note) note.textContent = ok ? 'Link copied to clipboard.' : 'Copy this link: ' + copy.getAttribute('data-copy-link'); };
+      if (navigator.clipboard) navigator.clipboard.writeText(copy.getAttribute('data-copy-link')).then(function () { done(true); }, function () { done(false); });
+      else done(false);
+    }
     var more = e.target.closest('.ct-more');
     if (more) {
       var open = more.getAttribute('aria-expanded') !== 'true';
