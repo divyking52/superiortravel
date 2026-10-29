@@ -1,3 +1,9 @@
 
 # Generated image export (node _tools/export-assets.mjs)
 /all assets/
+
+# Standalone single-file build (node _tools/make-standalone.mjs); kept local only
+/standalone/
+
+# Vercel CLI project link
+.vercel

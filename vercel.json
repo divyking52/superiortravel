@@ -1,0 +1,16 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/:slug(anniversary-valentines-getaways|benefits-of-using-a-travel-agent|close-to-home-yet-a-world-away|cuisine-to-caftans-explore-new-cultural-heritage-sites-around-the-world|echoes-of-the-vikings-exploring-norse-heritage-in-northern-europe|european-vacation-deals|five-steps-to-plan-your-european-river-cruise|get-more-out-of-your-next-vacation|mexico-meets-the-dominican-republic|travel-insurance-for-a-cruise|turks-and-caicos|what-does-a-travel-agent-do|why-use-a-travel-agent|your-pto-is-going-places-with-delta-vacations)",
+      "destination": "/blogs/:slug",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    { "source": "/", "destination": "/index.htm" },
+    { "source": "/api/(.*)", "destination": "https://superiortravel.com/api/$1" },
+    { "source": "/:path(.+\\.[a-zA-Z0-9]+)", "destination": "https://superiortravel.com/:path" }
+  ]
+}

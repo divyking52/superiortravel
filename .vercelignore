@@ -1,0 +1,7 @@
+# Not part of the published website
+/standalone
+/all assets
+/_drafts
+/_tools
+/content
+.gitignore
