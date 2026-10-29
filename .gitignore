@@ -7,3 +7,4 @@
 
 # Vercel CLI project link
 .vercel
+.env*
