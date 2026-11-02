@@ -95,12 +95,35 @@
   /* ------------------------------------------------------------------ */
   /* 4. Site search.                                                     */
   var STOP = { the: 1, a: 1, an: 1, and: 1, of: 1, to: 1, in: 1, for: 1, on: 1, with: 1, my: 1, me: 1, is: 1, at: 1, or: 1 };
-  var TYPES = ['Trip Type', 'Blog', 'Travel Journal', 'Destination', 'Advisor', 'Hotels & Resorts', 'Offer', 'Page'];
+  // Generic travel vocabulary so "Wine Tours" can reach "Wine & Culinary Travel"
+  // without listing individual advisors or categories in code.
+  var SYNONYMS = {
+    tour: ['travel', 'trip', 'vacation', 'escape', 'experience'],
+    travel: ['tour', 'trip', 'vacation', 'escape'],
+    trip: ['tour', 'travel', 'vacation', 'escape'],
+    vacation: ['tour', 'travel', 'trip', 'escape'],
+    escape: ['travel', 'vacation'],
+    hotel: ['resort', 'stay'],
+    resort: ['hotel', 'stay'],
+    stay: ['hotel', 'resort'],
+    cruise: ['sailing'],
+    sailing: ['cruise']
+  };
+  var GROUPS = [
+    { id: 'agents', title: 'Travel Agents', types: ['Advisor'] },
+    { id: 'categories', title: 'Travel Categories', types: ['Trip Type'] },
+    { id: 'articles', title: 'Blog Articles', types: ['Blog', 'Travel Journal'] },
+    { id: 'destinations', title: 'Destinations & Travel Experiences', types: ['Destination'] },
+    { id: 'partners', title: 'Hotels & Travel Partners', types: ['Hotels & Resorts'] },
+    { id: 'more', title: 'More results', types: ['Offer', 'Page'] }
+  ];
+  var groupIndex = {};
+  GROUPS.forEach(function (g, i) { groupIndex[g.id] = i; g.types.forEach(function (t) { groupIndex[t] = i; }); });
   var index = null;
   var indexPromise = null;
   var dialog = null;
   var lastTrigger = null;
-  var shown = 20;
+  var shown = 6;
 
   function norm(s) {
     return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -118,6 +141,8 @@
             e._t = norm(e.t);
             e._d = norm(e.d);
             e._b = norm(e.b);
+            e._s = norm((e.s || []).join(' '));
+            e._tags = norm((e.tags || []).join(' '));
             e._c = norm((e.c || []).map(function (id) { return data.categories[id] ? data.categories[id].t : ''; }).join(' ') + ' ' + e.k);
           });
           index = data;
@@ -127,18 +152,37 @@
     }
     return indexPromise;
   }
+  function fieldScore(e, t) {
+    var s = 0;
+    var hit = false;
+    var word = new RegExp('(^|[^a-z0-9])' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    if (e._t.indexOf(t) > -1) { s += word.test(e._t) ? 22 : 14; hit = true; }
+    if (e._s.indexOf(t) > -1) { s += word.test(e._s) ? 18 : 12; hit = true; }
+    if (e._c.indexOf(t) > -1) { s += 9; hit = true; }
+    if (e._tags.indexOf(t) > -1) { s += 8; hit = true; }
+    if (e._d.indexOf(t) > -1) { s += 5; hit = true; }
+    if (e._b.indexOf(t) > -1) { s += 1 + Math.min(e._b.split(t).length - 1, 6) * 0.35; hit = true; }
+    return hit ? s : 0;
+  }
   function score(e, tokens, phrase) {
     var s = 0;
     for (var k = 0; k < tokens.length; k++) {
       var t = tokens[k];
-      if (e._t.indexOf(t) > -1) s += new RegExp('(^|[^a-z0-9])' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(e._t) ? 18 : 12;
-      else if (e._c.indexOf(t) > -1) s += 9;
-      else if (e._d.indexOf(t) > -1) s += 5;
-      else if (e._b.indexOf(t) > -1) s += 1 + Math.min(e._b.split(t).length - 1, 6) * 0.4;
-      else return 0;
+      var hit = fieldScore(e, t);
+      if (!hit && SYNONYMS[t]) {
+        var syn = SYNONYMS[t];
+        for (var j = 0; j < syn.length && !hit; j++) hit = fieldScore(e, syn[j]) * 0.8;
+      }
+      if (!hit) return 0;
+      s += hit;
     }
-    if (phrase.length > 3 && e._t.indexOf(phrase) > -1) s += 15;
-    if (e.k === 'Trip Type' && e._c.indexOf(phrase) > -1) s += 6;
+    if (phrase.length > 3) {
+      if (e._t.indexOf(phrase) > -1) s += 30;
+      else if (e._s.indexOf(phrase) > -1) s += 24;
+      else if (e._d.indexOf(phrase) > -1) s += 10;
+      else if (e._b.indexOf(phrase) > -1) s += 4;
+    }
+    if (e.k === 'Advisor' && phrase.length > 1 && e._t.indexOf(phrase) > -1) s += 20;
     return s;
   }
   function highlight(text, tokens) {
@@ -177,21 +221,26 @@
       '<button type="button" class="st-search__close" aria-label="Close search"><span aria-hidden="true">×</span></button></div>' +
       '<form class="st-search__form" role="search" aria-label="Site search">' +
       '<label class="st-vh" for="st-search-input">Search blogs, destinations, trip types, advisors and hotels</label>' +
-      '<input id="st-search-input" type="search" name="q" autocomplete="off" spellcheck="false" placeholder="Try “Disney”, “river cruise” or an advisor’s name">' +
-      '<label class="st-vh" for="st-search-type">Content type</label>' +
-      '<select id="st-search-type"><option value="">All content</option>' +
-      TYPES.map(function (t) { return '<option>' + esc(t) + '</option>'; }).join('') + '</select></form>' +
+      '<input id="st-search-input" type="search" name="q" autocomplete="off" spellcheck="false" placeholder="Try “Disney”, “Nile River Cruises” or an advisor’s name">' +
+      '<button type="button" class="st-search__clear" hidden>Clear search</button>' +
+      '<label class="st-vh" for="st-search-type">Result type</label>' +
+      '<select id="st-search-type"><option value="">All results</option>' +
+      GROUPS.map(function (g) { return '<option value="' + g.id + '">' + esc(g.title) + '</option>'; }).join('') + '</select></form>' +
       '<p class="st-search__status" id="st-search-status" role="status" aria-live="polite"></p>' +
-      '<ul class="st-search__results" id="st-search-results" aria-labelledby="st-search-title"></ul>' +
+      '<div class="st-search__results" id="st-search-results" aria-labelledby="st-search-title"></div>' +
       '<button type="button" class="st-search__more" hidden>Show more results</button>' +
       '<div class="st-search__empty" hidden></div></div>';
     doc.body.appendChild(dialog);
 
     var input = dialog.querySelector('#st-search-input');
     var type = dialog.querySelector('#st-search-type');
+    var clear = dialog.querySelector('.st-search__clear');
     var timer = null;
-    input.addEventListener('input', function () { clearTimeout(timer); shown = 20; timer = setTimeout(run, 120); });
-    type.addEventListener('change', function () { shown = 20; run(); });
+    input.addEventListener('input', function () {
+      clearTimeout(timer); shown = 6; clear.hidden = !input.value; timer = setTimeout(run, 120);
+    });
+    type.addEventListener('change', function () { shown = 6; run(); });
+    clear.addEventListener('click', function () { input.value = ''; clear.hidden = true; shown = 6; input.focus(); run(); });
     dialog.querySelector('form').addEventListener('submit', function (e) {
       e.preventDefault();
       var first = dialog.querySelector('.st-search__results a');
@@ -213,17 +262,53 @@
       if (e.key === 'ArrowUp') (links[at - 1] || input).focus();
     });
     dialog.querySelector('.st-search__close').addEventListener('click', closeSearch);
-    dialog.querySelector('.st-search__more').addEventListener('click', function () { shown += 20; run(); });
+    dialog.querySelector('.st-search__more').addEventListener('click', function () { shown += 12; run(); });
     dialog.addEventListener('click', function (e) { if (e.target === dialog) closeSearch(); });
+    dialog.addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('.st-search__empty-clear')) {
+        input.value = '';
+        clear.hidden = true;
+        shown = 6;
+        input.focus();
+        run();
+      }
+    });
     dialog.addEventListener('close', function () {
       doc.documentElement.style.overflow = '';
       if (lastTrigger && lastTrigger.focus) lastTrigger.focus();
     });
   }
 
+  function resultTitle(e, tokens) {
+    return '<span class="st-search__title">' + highlight(e.t, tokens) + '</span>';
+  }
+  function catsFor(e) {
+    var cats = (e.c || []).map(function (id) { return index.categories[id] && index.categories[id].t; }).filter(Boolean);
+    return cats.length ? '<span class="st-search__cats">Trip types: ' + esc(cats.slice(0, 4).join(', ')) + '</span>' : '';
+  }
+  function renderHit(e, tokens) {
+    if (e.k === 'Advisor') {
+      var specs = (e.s || []).slice(0, 3);
+      var specialty = specs.length ? highlight(specs.join(' · '), tokens) : '';
+      return '<li class="st-search__item st-search__item--agent"><a class="st-search__hit st-search__hit--agent" href="' + esc(e.u) + '">' +
+        (e.img ? '<img class="st-search__avatar" src="' + esc(e.img) + '" alt="" width="56" height="70" loading="lazy" decoding="async">' : '') +
+        '<span class="st-search__body"><span class="st-search__badge">Travel Agent</span>' + resultTitle(e, tokens) +
+        '<span class="st-search__excerpt">' + (specialty || highlight(e.d || '', tokens)) + '</span>' +
+        (e.d && specialty ? '<span class="st-search__cats">' + esc(e.d) + '</span>' : '') +
+        '</span></a></li>';
+    }
+    var media = (e.k === 'Blog' || e.k === 'Travel Journal') && e.img;
+    var body = '<span class="st-search__type">' + esc(e.k) + (e.p ? ' · ' + esc(fmtDate(e.p)) : '') + '</span>' + resultTitle(e, tokens) +
+      '<span class="st-search__excerpt">' + highlight(snippet(e, tokens), tokens) + '</span>' + catsFor(e);
+    return '<li class="st-search__item"><a class="st-search__hit' + (media ? ' st-search__hit--media' : '') + '" href="' + esc(e.u) + '">' +
+      (media ? '<img class="st-search__thumb" src="' + esc(e.img) + '" alt="" loading="lazy" decoding="async">' : '') +
+      '<span class="st-search__body">' + body + '</span></a></li>';
+  }
+
   function run() {
     var input = dialog.querySelector('#st-search-input');
     var typeFilter = dialog.querySelector('#st-search-type').value;
+    var clear = dialog.querySelector('.st-search__clear');
     var list = dialog.querySelector('.st-search__results');
     var status = dialog.querySelector('.st-search__status');
     var empty = dialog.querySelector('.st-search__empty');
@@ -249,9 +334,10 @@
       return;
     }
     var phrase = norm(q);
+    var filter = typeFilter && GROUPS[groupIndex[typeFilter]] ? GROUPS[groupIndex[typeFilter]] : null;
     var results = [];
     index.entries.forEach(function (e) {
-      if (typeFilter && e.k !== typeFilter) return;
+      if (filter && filter.types.indexOf(e.k) < 0) return;
       var s = score(e, tokens, phrase);
       if (s > 0) results.push({ e: e, s: s });
     });
@@ -259,24 +345,28 @@
     if (!results.length) {
       list.innerHTML = '';
       more.hidden = true;
-      status.textContent = 'No results for “' + q + '”' + (typeFilter ? ' in ' + typeFilter : '') + '.';
+      status.textContent = 'No results for “' + q + '”' + (filter ? ' in ' + filter.title : '') + '.';
       empty.hidden = false;
-      empty.innerHTML = '<p>Check the spelling, try a broader term such as a destination or trip type' + (typeFilter ? ', or search all content' : '') + '. You can also <a href="/contact">ask an advisor</a> directly.</p>' + suggestions();
+      empty.innerHTML = '<p>Check the spelling, try a broader term such as a destination or trip type' + (filter ? ', or search all results' : '') + '. You can also <a href="/contact">ask an advisor</a> directly.</p><p><button type="button" class="st-search__empty-clear">Clear search</button></p>' + suggestions();
       return;
     }
     empty.hidden = true;
-    status.textContent = results.length + (results.length === 1 ? ' result' : ' results') + ' for “' + q + '”' + (typeFilter ? ' in ' + typeFilter : '') + '.';
-    list.innerHTML = results.slice(0, shown).map(function (r) {
-      var e = r.e;
-      var cats = (e.c || []).map(function (id) { return index.categories[id] && index.categories[id].t; }).filter(Boolean);
-      return '<li><a href="' + esc(e.u) + '">' +
-        '<span class="st-search__type">' + esc(e.k) + (e.p ? ' · ' + esc(fmtDate(e.p)) : '') + '</span>' +
-        '<span class="st-search__title">' + highlight(e.t, tokens) + '</span>' +
-        '<span class="st-search__excerpt">' + highlight(snippet(e, tokens), tokens) + '</span>' +
-        (cats.length ? '<span class="st-search__cats">Trip types: ' + esc(cats.slice(0, 4).join(', ')) + '</span>' : '') +
-        '</a></li>';
+    var groups = GROUPS.map(function (g) {
+      return { g: g, rows: results.filter(function (r) { return g.types.indexOf(r.e.k) > -1; }) };
+    }).filter(function (x) { return x.rows.length; });
+    var visible = 0;
+    groups.forEach(function (x) { visible += Math.min(x.rows.length, shown); });
+    status.textContent = results.length + (results.length === 1 ? ' matching result' : ' matching results') + ' for “' + q + '”' + (filter ? ' in ' + filter.title : '') + '.';
+    list.innerHTML = groups.map(function (x) {
+      var rows = x.rows.slice(0, shown);
+      return '<section class="st-search__group" aria-labelledby="st-search-group-' + x.g.id + '">' +
+        '<div class="st-search__group-head"><h3 id="st-search-group-' + x.g.id + '">' + esc(x.g.title) + '</h3><span class="st-search__count">' + x.rows.length + '</span></div>' +
+        '<ul class="st-search__list">' + rows.map(function (r) { return renderHit(r.e, tokens); }).join('') + '</ul>' +
+        (x.rows.length > shown ? '<p class="st-search__group-more">Showing ' + shown + ' of ' + x.rows.length + '</p>' : '') +
+        '</section>';
     }).join('');
-    more.hidden = results.length <= shown;
+    more.hidden = visible >= results.length;
+    more.textContent = 'Show more results';
   }
 
   function openSearch(query, trigger) {
@@ -284,6 +374,8 @@
     lastTrigger = trigger || doc.activeElement;
     var input = dialog.querySelector('#st-search-input');
     if (typeof query === 'string') input.value = query;
+    var clear = dialog.querySelector('.st-search__clear');
+    if (clear) clear.hidden = !input.value;
     if (!dialog.open) {
       if (dialog.showModal) dialog.showModal(); else dialog.setAttribute('open', '');
       doc.documentElement.style.overflow = 'hidden';

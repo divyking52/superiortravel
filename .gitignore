@@ -8,3 +8,6 @@
 # Vercel CLI project link
 .vercel
 .env*
+
+# Local QA screenshots, downloads and logo research scratch files
+/_tools/cache/

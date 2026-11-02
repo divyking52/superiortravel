@@ -206,8 +206,18 @@ for (const s of pageObj(teamPage).sections) {
 for (const a of agentsCfg.agents) {
   if (!agents.has(a.slug)) warn(`content/agents.json: ${a.slug} has no profile on /team.`);
   else if (a.clientName) report.notes.push(`Agent name: client brief says “${a.clientName}”, published profile says “${agents.get(a.slug).name}”. Confirm spelling.`);
+  const agent = agents.get(a.slug);
+  if (agent) {
+    agent.expertise = a.expertise || {};
+    agent.searchTerms = [...new Set((a.searchTerms || []).filter(Boolean))];
+  }
   if (!agents.get(a.slug)?.shortBio) report.notes.push(`Agent ${a.slug}: team-card bio is not a usable sentence (“${agents.get(a.slug)?.bio}”); category cards show listed specialties only. Ask the agent for a one-sentence bio.`);
 }
+/** Every searchable expertise phrase an editor has assigned to an agent. */
+const expertiseTerms = (a) => {
+  const x = a?.expertise || {};
+  return [...new Set([...(x.specialties || []), ...(x.products || []), ...(x.destinations || []), ...(x.brands || []), ...(x.experiences || [])].filter(Boolean))];
+};
 
 // ---------------------------------------------------------------------------------------------
 // 3. Categories.
@@ -226,7 +236,7 @@ const typeFor = (route) =>
   route.startsWith('/blogs/') ? 'Blog' :
   route.startsWith('/travel-journal/') ? 'Travel Journal' :
   route.startsWith('/destinations') ? 'Destination' :
-  route.startsWith('/team') ? 'Advisor' :
+  route.startsWith('/team/') ? 'Advisor' :
   route.startsWith('/product/') || route === '/packages' ? 'Offer' :
   /sandals|luxury-hotels-resorts|resort/.test(route) ? 'Hotels & Resorts' :
   cats.some((c) => c.url === route) ? 'Trip Type' : 'Page';
@@ -400,9 +410,22 @@ function updateHeader(win) {
     trip.mega = { ...(trip.mega || {}), columns: clone(megaColumns) };
   }
   const featured = items.find((i) => i.text === 'Featured Travel');
-  const col = featured?.mega?.columns?.find((c) => c.title === 'Featured Resorts');
-  if (col) {
-    col.items = col.items.filter((i) => !i._generated).concat(publishedHotels.map((h) => ({ text: h.name, link: { href: h.url }, _generated: true })));
+  if (featured) {
+    const columns = featured.mega?.columns || (featured.mega = { columns: [] }).columns;
+    // The client asked for the same nine trip types in Featured Travel as in Trip Types. The column
+    // is rebuilt from categories.json on every build, so editors manage both menus in one place.
+    const featuredCats = (nav.featured?.items || []).filter((id) => catById.has(id)).map((id) => catById.get(id));
+    if (featuredCats.length) {
+      const title = nav.featured?.title || 'Trip Types';
+      const itemsToAdd = featuredCats.map((c) => ({ text: c.title, ...(c.navDescription ? { description: c.navDescription } : {}), link: { href: c.url }, _generated: true }));
+      const col = columns.find((c) => c.title === title);
+      if (col) col.items = (col.items || []).filter((i) => !i._generated).concat(itemsToAdd);
+      else columns.push({ title, items: itemsToAdd });
+    }
+    const col = columns.find((c) => c.title === 'Featured Resorts');
+    if (col) {
+      col.items = col.items.filter((i) => !i._generated).concat(publishedHotels.map((h) => ({ text: h.name, link: { href: h.url }, _generated: true })));
+    }
   }
 }
 for (const page of pages.values()) updateHeader(page.win);
@@ -504,6 +527,121 @@ const allRoutes = [...baseRoutes, ...newRoutes];
 const everyPage = [...pages.values(), ...generated, ...drafts];
 for (const p of everyPage) p.win.__ROUTES__ = clone(allRoutes);
 
+// 9b. Complete the Blog and Travel Journal listings from every published article page.
+// Storebox's hub list can lag behind pages added or imported later; this keeps the hub,
+// its static HTML and the page data in sync without per-post CMS entries.
+const hubDate = (iso) => {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+};
+const hubImage = (src) => src ? {
+  id: '', width: 1200, height: 630, file_url: src, filename: src.split('?')[0].split('/').pop(), mimetype: 'image/jpeg',
+  thumbnails: Object.fromEntries(['micro', 'small', 'medium', 'large', 'xlarge', '2xlarge'].map((k) => [k, src])),
+} : null;
+const hubCard = (template, item) => {
+  let c = template;
+  const src = item.featured_image?.src || item.metadata?.featured_image_url || '';
+  const alt = item.featured_image?.alt || item.title;
+  c = c.replace(/href="[^"]*"/, `href="${escapeHtml(item.url)}"`);
+  if (src) c = c.replace(/(<img\b[^>]*?)src="[^"]*"/, `$1src="${escapeHtml(src)}"`);
+  c = c.replace(/(<img\b[^>]*?)alt="[^"]*"/, `$1alt="${escapeHtml(alt)}"`);
+  c = c.replace(/(<h4\b[^>]*>)[\s\S]*?(<\/h4>)/, `$1${escapeHtml(item.title)}$2`);
+  c = c.replace(/(<p\b[^>]*>)[\s\S]*?(<\/p>)/, `$1${escapeHtml(item.excerpt)}$2`);
+  c = c.replace(/<span>[\s\S]*?<\/span>/, `<span>${escapeHtml(hubDate(item.published_at))}</span>`);
+  return c;
+};
+for (const hubRoute of ['/blogs', '/travel-journal']) {
+  const hub = pages.get(hubRoute);
+  if (!hub) continue;
+  const hubSection = (pageObj(hub).sections || []).find((s) => s.layoutId === 'hubList');
+  if (!hubSection) continue;
+  const items = hubSection.items || [];
+  const known = new Set(items.map((i) => i.url));
+  const prefix = `${hubRoute}/`;
+  for (const p of pages.values()) {
+    if (!p.route.startsWith(prefix) || p.route === prefix || known.has(p.route)) continue;
+    const po = pageObj(p);
+    const article = (po.sections || []).find((s) => s.layoutId === 'blogPost')?.blogPost;
+    if (!article) continue;
+    const src = article.featured_image?.src || (typeof article.metadata?.featured_image === 'string' ? article.metadata.featured_image : '');
+    const og = hubImage(src);
+    const excerpt = article.excerpt || article.metadata?.seo_description || po.seo?.description || '';
+    const slug = article.slug || p.route.slice(prefix.length);
+    items.push({
+      id: article.id || slug,
+      title: article.title || pageTitle(p),
+      slug,
+      url: p.route,
+      content_type: hubRoute === '/blogs' ? 'blog_post' : 'custom_page',
+      excerpt,
+      published_at: article.published_at || article.metadata?.published_at || '',
+      metadata: {
+        ...(article.metadata || {}),
+        source: 'published_page',
+        ...(og ? { og_image: og, featured_image: og, og_image_url: src, featured_image_url: src } : {}),
+      },
+      featured_image: article.featured_image || null,
+    });
+    known.add(p.route);
+    report.notes.push(`Hub ${hubRoute}: added published article ${p.route} (${article.title}) missing from the Storebox hub list.`);
+  }
+  // Pin the time to midday UTC so the date a browser renders in its own timezone
+  // matches the server-rendered card in every practical timezone (avoids hydration
+  // text mismatches for articles published near midnight UTC).
+  for (const it of items) {
+    const d = new Date(it.published_at || '');
+    if (!Number.isNaN(d.getTime())) it.published_at = `${d.toISOString().slice(0, 10)}T12:00:00+00:00`;
+  }
+  // Newest first, matching the order the hub component renders.
+  items.sort((a, b) => String(b.published_at || '').localeCompare(String(a.published_at || '')));
+  hubSection.items = items;
+
+  // Rebuild the server-rendered card grid so hydration matches the new item list.
+  const html = hub.html;
+  const hubStart = html.indexOf('data-layout-id="hubList"');
+  const cardMarker = html.indexOf('style="opacity:0"', hubStart);
+  if (hubStart < 0 || cardMarker < 0) continue;
+  const firstCardStart = html.lastIndexOf('<div', cardMarker);
+  const gridStart = html.lastIndexOf('<div class="MuiBox-root css-', firstCardStart - 1);
+  if (gridStart < 0) continue;
+  const gridOpen = html.indexOf('>', gridStart) + 1;
+  let depth = 1;
+  let gridClose = -1;
+  const tok = /<div\b|<\/div>/g;
+  tok.lastIndex = gridOpen;
+  let m;
+  while ((m = tok.exec(html))) {
+    depth += m[0] === '<div' ? 1 : -1;
+    if (depth === 0) { gridClose = m.index; break; }
+  }
+  if (gridClose < 0) continue;
+  const inner = html.slice(gridOpen, gridClose);
+  const cards = new Map();
+  let cardDepth = 0;
+  let cardStart = 0;
+  let t;
+  const cardTok = /<div\b|<\/div>/g;
+  while ((t = cardTok.exec(inner))) {
+    if (t[0] === '<div') {
+      if (cardDepth === 0) cardStart = t.index;
+      cardDepth++;
+    } else {
+      cardDepth--;
+      if (cardDepth === 0) {
+        const chunk = inner.slice(cardStart, cardTok.lastIndex);
+        const href = (chunk.match(/<a\b[^>]*href="([^"]+)"/) || [])[1];
+        if (href) cards.set(href, chunk);
+      }
+    }
+  }
+  // Later cards omit the emotion <style> tags React injects before the first card;
+  // use one of those as the template so new cards match hydration output exactly.
+  const template = [...cards.values()].pop();
+  if (!template) continue;
+  const ordered = items.map((i) => cards.get(i.url) || hubCard(template, i)).join('');
+  hub.html = html.slice(0, gridOpen) + ordered + html.slice(gridClose);
+}
+
 const cssAsset = read('assets/st-site.css');
 const jsAsset = read('assets/st-site.js');
 const assetHead = `<link rel="stylesheet" href="/assets/st-site.css?v=${hash(cssAsset)}" data-st-asset/>`;
@@ -532,17 +670,29 @@ for (const p of everyPage) {
 // ---------------------------------------------------------------------------------------------
 // 10. Search index + agent directory data.
 const TEXT_SKIP = new Set([...IR_SKIP_KEYS, 'layoutId', 'variant', 'align', 'background', 'contrast', 'tone', 'eyebrow', 'mimetype', 'thumbnails', 'og_image', 'faq_schema', 'source', 'metadata']);
+const RELATED_BLOCK = /<div class="st-related">[\s\S]*?<\/div>/gi;
 function collectText(node, key = '', out = []) {
   if (typeof node === 'string') {
     if (TEXT_SKIP.has(key) || /^(https?:|\/|#|mailto:|tel:)/.test(node) || !/\s/.test(node.trim())) return out;
-    out.push(node.includes('<') ? stripTags(node) : node);
+    out.push(node.includes('<') ? stripTags(node.replace(RELATED_BLOCK, ' ')) : node);
   } else if (Array.isArray(node)) node.forEach((v) => collectText(v, key, out));
   else if (node && typeof node === 'object') for (const [k, v] of Object.entries(node)) collectText(v, k, out);
   return out;
 }
-const hubDates = new Map();
+const hubMeta = new Map();
 for (const r of ['/blogs', '/travel-journal']) {
-  for (const it of pageObj(pages.get(r)).sections.find((s) => s.layoutId === 'hubList')?.items || []) hubDates.set(it.url, (it.published_at || '').slice(0, 10));
+  for (const it of pageObj(pages.get(r)).sections.find((s) => s.layoutId === 'hubList')?.items || []) {
+    const md = it.metadata || {};
+    const featured = md.featured_image || (md.og_image && typeof md.og_image === 'object' ? md.og_image : null);
+    const image = featured?.thumbnails?.small || featured?.file_url || (typeof md.og_image === 'string' ? md.og_image : '');
+    hubMeta.set(it.url, {
+      date: (it.published_at || md.published_at || '').slice(0, 10),
+      image,
+      excerpt: it.excerpt || '',
+      tags: md.tags || [],
+      categories: md.categories || [],
+    });
+  }
 }
 const kwRes = cats.map((c) => ({ id: c.id, res: (c.keywords || []).map((k) => new RegExp(`\\b${reEsc(k)}\\b`, 'gi')) }));
 const categorize = (title, desc, body) =>
@@ -561,23 +711,67 @@ for (const p of [...pages.values(), ...generated]) {
   const sections = (po.sections || []).filter((s) => s.id !== 'site-planning-cta');
   const title = pageTitle(p);
   const desc = pageDescription(p);
+  const meta = hubMeta.get(p.route);
+  const blogPost = (po.sections || []).find((s) => s.layoutId === 'blogPost')?.blogPost;
+  const blogImage = blogPost?.featured_image?.thumbnails?.small || blogPost?.featured_image?.file_url || po.seo?.og_image || '';
   let body = collectText(sections).join(' ').replace(/\s+/g, ' ').trim();
-  const limit = p.route.startsWith('/destinations/') ? 700 : 3500;
+  // Blog and Travel Journal articles are indexed in full so historical posts stay discoverable.
+  const longForm = p.route.startsWith('/blogs/') || p.route.startsWith('/travel-journal/');
+  // Drop shared navigation/related-link blocks so a link in every page footer
+  // cannot make an unrelated page match a brand or trip-type query.
+  if (longForm) body = body.replace(/\s*Explore more from Superior Travel Consultants\b[\s\S]*?(?=Frequently Asked Questions\b|$)/i, ' ');
+  else body = body.replace(/\s*More trip types\b[\s\S]*$/i, ' ');
+  body = body.replace(/\s*Long Island advisors with more than 150 years\b[\s\S]*$/i, ' ');
+  body = body.replace(/\s*Explore more with our advisors\s*/gi, ' ');
+  body = body.replace(/\s+/g, ' ').trim();
+  const limit = longForm ? 30000 : p.route.startsWith('/destinations/') ? 700 : 3500;
   body = body.slice(0, limit);
+  if (meta) body = `${body} ${meta.tags.join(' ')} ${meta.categories.join(' ')}`.trim();
   let c = categorize(title, desc, body);
   const cat = cats.find((x) => x.url === p.route);
-  if (cat) c = [...new Set([cat.id, ...c])];
+  if (cat) {
+    c = [...new Set([cat.id, ...c])];
+    body = `${body} ${(cat.keywords || []).join(' ')}`.slice(0, limit + 600);
+  }
   if (p.route.startsWith('/team/')) {
     // Advisors are only tagged with the client-supplied trip-type assignments, never inferred ones.
     const slug = p.route.split('/').pop();
-    c = cats.filter((x) => (x.agents || []).includes(slug)).map((x) => x.id);
-  } else if (p.route === '/team') c = [];
-  searchEntries.push({ u: p.route, t: title, k: typeFor(p.route), d: desc.slice(0, 220), c, ...(hubDates.get(p.route) ? { p: hubDates.get(p.route) } : {}), b: body });
+    const a = agents.get(slug);
+    const assigned = cats.filter((x) => (x.agents || []).includes(slug));
+    c = assigned.map((x) => x.id);
+    const specials = [...new Set([...assigned.map((x) => x.title), ...(a?.specialtyLabels || []), ...(a?.expertise?.specialties || [])])];
+    const searchBody = [a?.bio, a?.role, ...(a?.specialtyLabels || []), ...expertiseTerms(a), ...(a?.searchTerms || [])].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+    searchEntries.push({
+      u: p.route,
+      t: a?.name || title,
+      k: 'Advisor',
+      d: a?.shortBio || a?.role || desc,
+      c,
+      ...(a?.thumbs ? { img: a.thumbs[160] } : {}),
+      s: specials,
+      b: searchBody.slice(0, 20000),
+    });
+    continue;
+  }
+  if (p.route === '/team') c = [];
+  const entryDate = meta?.date || (blogPost?.published_at || '').slice(0, 10);
+  const entryImage = meta?.image || blogImage;
+  searchEntries.push({
+    u: p.route,
+    t: title,
+    k: typeFor(p.route),
+    d: (meta?.excerpt || blogPost?.metadata?.excerpt || desc).slice(0, 220),
+    c,
+    ...(entryDate ? { p: entryDate } : {}),
+    ...(entryImage ? { img: entryImage } : {}),
+    ...(meta?.tags.length ? { tags: meta.tags } : {}),
+    b: body,
+  });
 }
-const searchIndex = { v: 1, built: TODAY, categories: Object.fromEntries(cats.map((c) => [c.id, { t: c.title, u: c.url }])), entries: searchEntries };
+const searchIndex = { v: 2, built: TODAY, categories: Object.fromEntries(cats.map((c) => [c.id, { t: c.title, u: c.url }])), entries: searchEntries };
 const agentDirectory = {
   categories: orderedCats.filter((c) => c.agents?.length).map((c) => ({ id: c.id, title: c.title, url: c.url, agents: c.agents })),
-  agents: [...agents.values()].map((a) => ({ slug: a.slug, name: a.name, role: a.role, specialties: a.specialtyLabels, profile: a.profileUrl })),
+  agents: [...agents.values()].map((a) => ({ slug: a.slug, name: a.name, role: a.role, specialties: [...new Set([...a.specialtyLabels, ...(a.expertise?.specialties || [])])], expertise: a.expertise || {}, profile: a.profileUrl })),
 };
 
 // ---------------------------------------------------------------------------------------------

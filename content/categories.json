@@ -1,8 +1,12 @@
 {
-  "$comment": "Travel categories (trip types). Edit, reorder, publish/unpublish here, then run `node _tools/build.mjs`. `page: \"new\"` generates a landing page at /<slug>; `page: \"/existing-url\"` points the category at an existing page and appends an advisor section to it. `related` must only list URLs that already exist on the site. `intro` copy is pending client approval (see _tools/reports/build-report.md).",
+  "$comment": "Travel categories (trip types). Edit, reorder, publish/unpublish here, then run `node _tools/build.mjs`. `page: \"new\"` generates a landing page at /<slug>; `page: \"/existing-url\"` points the category at an existing page and appends an advisor section to it. `related` must only list URLs that already exist on the site. `intro` copy is pending client approval (see _tools/reports/build-report.md). `navigation.featured` lists the trip types shown in the Featured Travel dropdown; `navigation.columns` controls the Trip Types mega menu.",
   "navigation": {
     "menuLabel": "Trip Types",
     "menuHref": "/cruises",
+    "featured": {
+      "title": "Trip Types",
+      "items": ["adventure-travel", "religious-jewish-travel", "wine-culinary-travel", "disney-vacations", "entertainment-tickets", "river-cruises", "build-your-own-experience", "luxury-travel", "honeymoons"]
+    },
     "columns": [
       { "title": "Find Your Kind of Trip", "items": ["cruises", "river-cruises", "family-vacations", "disney-vacations", "romantic-escapes", "honeymoons"] },
       { "title": "Luxury & Special Interest", "items": ["luxury-escapes", "luxury-travel", "adventure-travel", "wine-culinary-travel", "religious-jewish-travel"] },
@@ -117,8 +121,8 @@
       "title": "River Cruises",
       "status": "published",
       "page": "/escorted-tours-river-cruises",
-      "agents": ["lois-howes", "robin-holian", "fran-lozano"],
-      "keywords": ["river cruise", "river cruises", "danube", "rhine", "viking", "amawaterways", "escorted tour"]
+      "agents": ["lois-howes", "robin-holian", "fran-lozano", "james-mcparland"],
+      "keywords": ["river cruise", "river cruises", "nile", "nile river cruises", "danube", "rhine", "viking", "amawaterways", "escorted tour"]
     },
     {
       "id": "build-your-own-experience",

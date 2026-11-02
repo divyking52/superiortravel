@@ -43,7 +43,7 @@ button[aria-label="Back to top"]:hover,button[aria-label="Back to top"]:focus-vi
 
 /* ---------- Homepage partner logo rail: pause control ---------- */
 .sth .logos-viewport:focus-within .logos,.sth .logos-viewport.st-paused .logos{animation-play-state:paused!important}
-.st-rail-toggle{display:inline-flex;align-items:center;gap:6px;margin:14px 0 0;padding:6px 12px;border:1px solid #c9d3d6;border-radius:999px;background:#fff;color:#17323e;font:600 12px/1.2 "Work Sans",system-ui,sans-serif;cursor:pointer}
+.st-rail-toggle{display:inline-flex;align-items:center;gap:6px;margin:14px 16px 0 0;padding:6px 12px;border:1px solid #c9d3d6;border-radius:999px;background:#fff;color:#17323e;font:600 12px/1.2 "Work Sans",system-ui,sans-serif;cursor:pointer}
 .st-rail-toggle:hover{border-color:#C87812}
 .st-rail-toggle:focus-visible{outline:3px solid #C87812;outline-offset:2px}
 
@@ -73,24 +73,38 @@ button[aria-label="Back to top"]:hover,button[aria-label="Back to top"]:focus-vi
 .st-search__form input,.st-search__form select{font:inherit;color:#17323E;border:1px solid #b9c7cb;border-radius:10px;background:#fff;min-height:46px;padding:10px 12px}
 .st-search__form input{flex:1 1 300px;font-size:16px}
 .st-search__form select{flex:0 1 190px}
+.st-search__clear{min-height:46px;padding:9px 14px;border:1px solid #b9c7cb;border-radius:10px;background:#fff;font:600 13px/1.1 "Work Sans",system-ui,sans-serif;color:#17323E;cursor:pointer}
+.st-search__clear:hover{background:#FBE8C9;border-color:#C87812}
 .st-search :focus-visible{outline:3px solid #C87812;outline-offset:2px}
 .st-search__status{margin:0;padding:4px 18px 8px;font-size:13px;color:#5D7079}
-.st-search__results{list-style:none;margin:0;padding:0 10px 14px;overflow-y:auto;overscroll-behavior:contain}
-.st-search__results li{margin:0}
-.st-search__results a{display:block;padding:12px 10px;border-radius:10px;color:inherit;text-decoration:none;border-bottom:1px solid #e8eeef}
-.st-search__results a:hover,.st-search__results a:focus-visible{background:#EDF6F8}
+.st-search__results{padding:0 16px 14px;overflow-y:auto;overscroll-behavior:contain}
+.st-search__group{margin-top:14px}
+.st-search__group-head{position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 2px;background:#FFFCF7;border-bottom:1px solid #dce6e8}
+.st-search__group-head h3{margin:0;font:700 11.5px/1.2 "Work Sans",system-ui,sans-serif;letter-spacing:.13em;text-transform:uppercase;color:#a66b1f}
+.st-search__count{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;padding:0 8px;border-radius:999px;background:#EDF6F8;color:#17323E;font-size:11.5px;font-weight:700}
+.st-search__list{list-style:none;margin:0;padding:0}
+.st-search__item{margin:0}
+.st-search__hit{display:flex;align-items:flex-start;gap:12px;padding:12px 8px;border-radius:10px;color:inherit;text-decoration:none;border-bottom:1px solid #e8eeef}
+.st-search__hit:hover,.st-search__hit:focus-visible{background:#EDF6F8}
+.st-search__body{display:block;min-width:0;flex:1}
+.st-search__badge{display:inline-block;margin-bottom:2px;padding:2px 7px;border-radius:999px;background:#FBE8C9;color:#7a4c12;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
 .st-search__type{display:block;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#a66b1f}
 .st-search__title{display:block;font:500 20px/1.2 "EB Garamond",Georgia,serif;margin:2px 0 3px}
 .st-search__excerpt{display:block;font-size:13.5px;color:#4a5f68}
 .st-search__cats{display:block;margin-top:4px;font-size:12px;color:#5D7079}
+.st-search__thumb{flex:none;width:96px;height:64px;object-fit:cover;border-radius:8px;background:#EDF6F8}
+.st-search__avatar{flex:none;width:56px;height:70px;object-fit:cover;border-radius:8px;background:#EDF6F8}
+.st-search__group-more{margin:6px 8px 0;font-size:12px;color:#5D7079}
 .st-search mark{background:#FBE8C9;color:inherit;border-radius:3px;padding:0 1px}
 .st-search__more{margin:0 18px 16px;align-self:flex-start;padding:9px 14px;border:1px solid #b9c7cb;border-radius:10px;background:#fff;font:600 13px/1 "Work Sans",system-ui,sans-serif;color:#17323E;cursor:pointer}
 .st-search__empty{padding:6px 18px 18px}
 .st-search__empty p{margin:0 0 10px}
+.st-search__empty-clear{padding:8px 14px;border:1px solid #b9c7cb;border-radius:10px;background:#fff;font:600 13px/1 "Work Sans",system-ui,sans-serif;color:#17323E;cursor:pointer}
+.st-search__empty-clear:hover{background:#FBE8C9;border-color:#C87812}
 .st-search__chips{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
 .st-search__chips a{display:inline-block;padding:7px 12px;border:1px solid #d7dfe1;border-radius:999px;background:#fff;color:#17323E;text-decoration:none;font-size:13px;font-weight:600}
 .st-search__chips a:hover{border-color:#C87812}
-@media (max-width:600px){.st-search{margin-top:0;max-height:100vh;width:100vw;max-width:100vw;border-radius:0;height:100%}.st-search__panel{max-height:100vh;height:100%}}
+@media (max-width:600px){.st-search{margin-top:0;max-height:100vh;width:100vw;max-width:100vw;border-radius:0;height:100%}.st-search__panel{max-height:100vh;height:100%}.st-search__results{padding:0 10px 14px}.st-search__thumb{width:72px;height:54px}.st-search__title{font-size:19px}.st-search__clear{flex:0 0 auto}}
 
 /* ---------- Agent directory filter (/team) ---------- */
 .st-agent-filter{margin:0 0 28px;padding:18px;border:1px solid #dce6e8;border-radius:14px;background:#fff;font:15px/1.5 "Work Sans",system-ui,sans-serif;color:#17323E}

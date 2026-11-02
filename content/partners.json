@@ -1,57 +1,387 @@
 {
-  "$comment": "Travel partners shown on /partners (featured logo wall + directory) and in the homepage logo rail (featured, in order). Add, edit, reorder or remove entries here, then run `node _tools/build.mjs`. `website` is optional: when set, the logo links to it in a new tab; leave empty until the client confirms the correct destination URL. Directory descriptions are partner-supplied text and are published as-is.",
+  "$comment": [
+    "featured drives the homepage partner rail and the /partners logo wall; directory drives the partner directory.",
+    "Logo files under /media/partners were normalised from official brand sites, official press/media assets, or Wikimedia brand-logo files; see _tools/partners-manifest.json for per-brand provenance.",
+    "Carnival Cruise Line was removed at the client's request. Belmond appears once (hotels + rail). The Scenic logo represents Scenic Eclipse and Scenic River. AmaWaterways and Viking are retained existing partners.",
+    "Five requested rail brands are not present because no standalone official brand mark could be verified: Royal Scotsman, Britannic Explorer, Eastern & Oriental Express, British Pullman, Rovos Rail. They travel under the Belmond brand, whose logo is included once. Do not substitute text placeholders.",
+    "Each entry: name, logo (root-relative path or URL), alt text, website. To add or replace a logo, drop a PNG/SVG in media/partners, update logo and alt, and add the official website URL. Admin edits flow into the next content build without code changes."
+  ],
   "featured": [
     {
+      "name": "The Ritz-Carlton",
+      "logo": "/media/partners/ritz-carlton.png",
+      "alt": "The Ritz-Carlton logo",
+      "website": "https://www.ritzcarlton.com"
+    },
+    {
+      "name": "St. Regis",
+      "logo": "/media/partners/st-regis.png",
+      "alt": "St. Regis logo",
+      "website": "https://www.marriott.com/st-regis"
+    },
+    {
+      "name": "Rosewood",
+      "logo": "/media/partners/rosewood.png",
+      "alt": "Rosewood logo",
+      "website": "https://www.rosewoodhotels.com"
+    },
+    {
+      "name": "Mandarin Oriental",
+      "logo": "/media/partners/mandarin-oriental.png",
+      "alt": "Mandarin Oriental logo",
+      "website": "https://www.mandarinoriental.com"
+    },
+    {
+      "name": "The Peninsula",
+      "logo": "/media/partners/peninsula.png",
+      "alt": "The Peninsula logo",
+      "website": "https://www.peninsula.com"
+    },
+    {
+      "name": "Aman",
+      "logo": "/media/partners/aman.png",
+      "alt": "Aman logo",
+      "website": "https://www.aman.com"
+    },
+    {
+      "name": "One&Only",
+      "logo": "/media/partners/one-and-only.png",
+      "alt": "One&Only logo",
+      "website": "https://www.oneandonlyresorts.com"
+    },
+    {
+      "name": "Raffles",
+      "logo": "/media/partners/raffles.png",
+      "alt": "Raffles logo",
+      "website": "https://www.raffles.com"
+    },
+    {
+      "name": "Belmond",
+      "logo": "/media/partners/belmond.png",
+      "alt": "Belmond logo",
+      "website": "https://www.belmond.com"
+    },
+    {
+      "name": "Six Senses",
+      "logo": "/media/partners/six-senses.png",
+      "alt": "Six Senses logo",
+      "website": "https://www.sixsenses.com"
+    },
+    {
+      "name": "Waldorf Astoria",
+      "logo": "/media/partners/waldorf-astoria.png",
+      "alt": "Waldorf Astoria logo",
+      "website": "https://www.waldorfastoria.com"
+    },
+    {
+      "name": "Park Hyatt",
+      "logo": "/media/partners/park-hyatt.png",
+      "alt": "Park Hyatt logo",
+      "website": "https://www.hyatt.com/park-hyatt"
+    },
+    {
+      "name": "The Luxury Collection",
+      "logo": "/media/partners/luxury-collection.png",
+      "alt": "The Luxury Collection logo",
+      "website": "https://www.marriott.com/luxury-collection"
+    },
+    {
+      "name": "EDITION",
+      "logo": "/media/partners/edition.png",
+      "alt": "EDITION logo",
+      "website": "https://www.editionhotels.com"
+    },
+    {
+      "name": "Fairmont",
+      "logo": "/media/partners/fairmont.png",
+      "alt": "Fairmont logo",
+      "website": "https://www.fairmont.com"
+    },
+    {
+      "name": "Jumeirah",
+      "logo": "/media/partners/jumeirah.png",
+      "alt": "Jumeirah logo",
+      "website": "https://www.jumeirah.com"
+    },
+    {
+      "name": "Shangri-La",
+      "logo": "/media/partners/shangri-la.png",
+      "alt": "Shangri-La logo",
+      "website": "https://www.shangri-la.com"
+    },
+    {
+      "name": "Kempinski",
+      "logo": "/media/partners/kempinski.png",
+      "alt": "Kempinski logo",
+      "website": "https://www.kempinski.com"
+    },
+    {
+      "name": "Regent Hotels & Resorts",
+      "logo": "/media/partners/regent.png",
+      "alt": "Regent Hotels & Resorts logo",
+      "website": "https://www.regenthotels.com"
+    },
+    {
+      "name": "Capella Hotels and Resorts",
+      "logo": "/media/partners/capella.png",
+      "alt": "Capella Hotels and Resorts logo",
+      "website": "https://capellahotels.com"
+    },
+    {
+      "name": "Auberge Resorts Collection",
+      "logo": "/media/partners/auberge.png",
+      "alt": "Auberge Resorts Collection logo",
+      "website": "https://auberge.com"
+    },
+    {
+      "name": "Four Seasons",
+      "logo": "/media/partners/four-seasons.png",
+      "alt": "Four Seasons logo",
+      "website": "https://www.fourseasons.com"
+    },
+    {
+      "name": "Dorchester Collection",
+      "logo": "/media/partners/dorchester.png",
+      "alt": "Dorchester Collection logo",
+      "website": "https://www.dorchestercollection.com"
+    },
+    {
+      "name": "Rocco Forte Hotels",
+      "logo": "/media/partners/rocco-forte.png",
+      "alt": "Rocco Forte Hotels logo",
+      "website": "https://www.roccofortehotels.com"
+    },
+    {
+      "name": "Maybourne",
+      "logo": "/media/partners/maybourne.png",
+      "alt": "Maybourne logo",
+      "website": "https://www.maybourne.com"
+    },
+    {
+      "name": "The Leading Hotels of the World",
+      "logo": "/media/partners/lhw.png",
+      "alt": "The Leading Hotels of the World logo",
+      "website": "https://www.lhw.com"
+    },
+    {
+      "name": "Small Luxury Hotels of the World",
+      "logo": "/media/partners/slh.png",
+      "alt": "Small Luxury Hotels of the World logo",
+      "website": "https://www.slh.com"
+    },
+    {
+      "name": "Relais & Châteaux",
+      "logo": "/media/partners/relais-chateaux.png",
+      "alt": "Relais & Châteaux logo",
+      "website": "https://www.relaischateaux.com"
+    },
+    {
+      "name": "Preferred Hotels & Resorts",
+      "logo": "/media/partners/preferred.png",
+      "alt": "Preferred Hotels & Resorts logo",
+      "website": "https://preferredhotels.com"
+    },
+    {
+      "name": "Regent Seven Seas Cruises",
+      "logo": "/media/partners/regent-seven-seas.png",
+      "alt": "Regent Seven Seas Cruises logo",
+      "website": "https://www.rssc.com"
+    },
+    {
+      "name": "Silversea",
+      "logo": "/media/partners/silversea.png",
+      "alt": "Silversea logo",
+      "website": "https://www.silversea.com"
+    },
+    {
+      "name": "Seabourn",
+      "logo": "/media/partners/seabourn.png",
+      "alt": "Seabourn logo",
+      "website": "https://www.seabourn.com"
+    },
+    {
+      "name": "Explora Journeys",
+      "logo": "/media/partners/explora.png",
+      "alt": "Explora Journeys logo",
+      "website": "https://explorajourneys.com"
+    },
+    {
+      "name": "The Ritz-Carlton Yacht Collection",
+      "logo": "/media/partners/ritz-yacht.png",
+      "alt": "The Ritz-Carlton Yacht Collection logo",
+      "website": "https://www.ritzcarltonyachtcollection.com"
+    },
+    {
+      "name": "Four Seasons Yachts",
+      "logo": "/media/partners/four-seasons-yachts.png",
+      "alt": "Four Seasons Yachts logo",
+      "website": "https://www.fourseasonsyachts.com"
+    },
+    {
+      "name": "Crystal",
+      "logo": "/media/partners/crystal.png",
+      "alt": "Crystal logo",
+      "website": "https://www.crystalcruises.com"
+    },
+    {
+      "name": "Oceania Cruises",
+      "logo": "/media/partners/oceania.png",
+      "alt": "Oceania Cruises logo",
+      "website": "https://www.oceaniacruises.com"
+    },
+    {
+      "name": "PONANT",
+      "logo": "/media/partners/ponant.png",
+      "alt": "PONANT logo",
+      "website": "https://www.ponant.com"
+    },
+    {
+      "name": "Scenic Eclipse",
+      "logo": "/media/partners/scenic.png",
+      "alt": "Scenic Eclipse logo",
+      "website": "https://www.scenicusa.com"
+    },
+    {
+      "name": "SeaDream Yacht Club",
+      "logo": "/media/partners/seadream.png",
+      "alt": "SeaDream Yacht Club logo",
+      "website": "https://www.seadream.com"
+    },
+    {
+      "name": "Windstar Cruises",
+      "logo": "/media/partners/windstar.png",
+      "alt": "Windstar Cruises logo",
+      "website": "https://www.windstarcruises.com"
+    },
+    {
+      "name": "Paul Gauguin Cruises",
+      "logo": "/media/partners/paul-gauguin.png",
+      "alt": "Paul Gauguin Cruises logo",
+      "website": "https://www.pgcruises.com"
+    },
+    {
+      "name": "Poseidon Expeditions",
+      "logo": "/media/partners/poseidon.png",
+      "alt": "Poseidon Expeditions logo",
+      "website": "https://www.poseidonexpeditions.com"
+    },
+    {
+      "name": "Cunard",
+      "logo": "/media/partners/cunard.png",
+      "alt": "Cunard logo",
+      "website": "https://www.cunard.com"
+    },
+    {
       "name": "Royal Caribbean",
-      "logo": "https://admin.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/8e3c98a6-9383-47c8-bf73-b2eca84cc4f2/royal-caribbean-v2.png",
+      "logo": "/media/partners/royal-caribbean.png",
       "alt": "Royal Caribbean logo",
-      "website": ""
+      "website": "https://www.royalcaribbean.com"
     },
     {
       "name": "Virgin Voyages",
-      "logo": "https://admin.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/41a79cd4-bf74-4bd3-a150-d602bac26c1b/virgin-voyages-v2.png",
+      "logo": "/media/partners/virgin-voyages.png",
       "alt": "Virgin Voyages logo",
-      "website": ""
+      "website": "https://www.virginvoyages.com"
     },
     {
       "name": "Norwegian Cruise Line",
-      "logo": "https://admin.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/ecae8e0e-dea7-427e-b5eb-3ee28a08e464/norwegian-cruise-line-v2.png",
+      "logo": "/media/partners/norwegian-cruise-line.png",
       "alt": "Norwegian Cruise Line logo",
-      "website": ""
+      "website": "https://www.ncl.com"
     },
     {
-      "name": "Carnival Cruise Line",
-      "logo": "https://admin.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/cca94d31-d397-48be-9dcd-3afd468b2690/carnival-cruise-line-v2.png",
-      "alt": "Carnival Cruise Line logo",
-      "website": ""
+      "name": "Uniworld",
+      "logo": "/media/partners/uniworld.png",
+      "alt": "Uniworld logo",
+      "website": "https://www.uniworld.com"
     },
     {
       "name": "AmaWaterways",
-      "logo": "https://admin.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/6f46f440-0afb-4aa3-b9e2-4e73534782cd/amawaterways-v2.png",
+      "logo": "/media/partners/amawaterways.png",
       "alt": "AmaWaterways logo",
-      "website": ""
+      "website": "https://www.amawaterways.com"
+    },
+    {
+      "name": "Tauck",
+      "logo": "/media/partners/tauck.png",
+      "alt": "Tauck logo",
+      "website": "https://www.tauck.com"
+    },
+    {
+      "name": "Riverside Luxury Cruises",
+      "logo": "/media/partners/riverside.png",
+      "alt": "Riverside Luxury Cruises logo",
+      "website": "https://riverside-cruises.com"
+    },
+    {
+      "name": "Emerald Cruises",
+      "logo": "/media/partners/emerald.png",
+      "alt": "Emerald Cruises logo",
+      "website": "https://www.emeraldcruises.com"
     },
     {
       "name": "Viking",
-      "logo": "https://admin.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/aa6fa8d4-c7e5-4452-9ac8-aa7cfe918eca/viking-v2.png",
+      "logo": "/media/partners/viking.png",
       "alt": "Viking logo",
-      "website": ""
+      "website": "https://www.vikingcruises.com"
+    },
+    {
+      "name": "Avalon Waterways",
+      "logo": "/media/partners/avalon.png",
+      "alt": "Avalon Waterways logo",
+      "website": "https://www.avalonwaterways.com"
+    },
+    {
+      "name": "Venice Simplon-Orient-Express",
+      "logo": "/media/partners/venice-simplon.png",
+      "alt": "Venice Simplon-Orient-Express logo",
+      "website": "https://www.belmond.com/trains/europe/venice-simplon-orient-express"
+    },
+    {
+      "name": "La Dolce Vita Orient Express",
+      "logo": "/media/partners/la-dolce-vita.png",
+      "alt": "La Dolce Vita Orient Express logo",
+      "website": "https://www.belmond.com/trains/europe/la-dolce-vita-orient-express"
+    },
+    {
+      "name": "Rocky Mountaineer",
+      "logo": "/media/partners/rocky-mountaineer.png",
+      "alt": "Rocky Mountaineer logo",
+      "website": "https://www.rockymountaineer.com"
+    },
+    {
+      "name": "Golden Eagle Luxury Trains",
+      "logo": "/media/partners/golden-eagle.png",
+      "alt": "Golden Eagle Luxury Trains logo",
+      "website": "https://www.goldeneagleluxurytrains.com"
+    },
+    {
+      "name": "Maharajas' Express",
+      "logo": "/media/partners/maharajas.png",
+      "alt": "Maharajas' Express logo",
+      "website": "https://www.maharajasexpress.com"
+    },
+    {
+      "name": "Blue Train",
+      "logo": "/media/partners/blue-train.png",
+      "alt": "Blue Train logo",
+      "website": "https://www.bluetrain.co.za"
     },
     {
       "name": "Sandals Resorts",
-      "logo": "https://admin.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/afb0c3da-a1ba-492f-89d8-50211a423192/sandals-v2.png",
+      "logo": "/media/partners/sandals.png",
       "alt": "Sandals Resorts logo",
-      "website": ""
+      "website": "https://www.sandals.com"
     },
     {
       "name": "Beaches Resorts",
-      "logo": "https://admin.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/3f800c00-f42b-49e8-8913-19f580410249/beaches-v2.png",
+      "logo": "/media/partners/beaches.png",
       "alt": "Beaches Resorts logo",
-      "website": ""
+      "website": "https://www.beaches.com"
     },
     {
       "name": "Disney Destinations",
-      "logo": "https://admin.storebox.ai/media/ae19d98f-7028-4345-a14a-6cc77fa221e7/cd613866-dc19-4d05-92c0-06b28c24c643/disney-destinations-v2.png",
+      "logo": "/media/partners/disney-destinations.png",
       "alt": "Disney Destinations logo",
       "website": ""
     }
